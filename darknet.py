@@ -1,9 +1,7 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
 
-import numpy as np
+import onnx
 
 from utils import predict_transform, write_results
 
@@ -68,7 +66,7 @@ def create_modules(blocks: List[Dict[str, str]]) -> Tuple[Dict[str, str], nn.Mod
 
             pad = (kernel_size - 1) // 2 if padding else 0
 
-            conv = nn.Conv2d(in_channels=prev_filters, out_channels=filters, kernel_size=kernel_size, stride=stride, padding=pad, bias=False)
+            conv = nn.Conv2d(in_channels=prev_filters, out_channels=filters, kernel_size=kernel_size, stride=stride, padding=pad, bias=bias)
             module.add_module(f'Conv_{i}', conv)
 
             if batch_normalize:
@@ -119,7 +117,7 @@ def create_modules(blocks: List[Dict[str, str]]) -> Tuple[Dict[str, str], nn.Mod
             
             detection = DetectionLayer(anchors=anchors)
             module.add_module(f'Detection_{i}', detection)
-        #print(out_filters)
+        
         module_list.append(module=module)
         prev_filters = filters
         out_filters.append(filters)
@@ -156,10 +154,8 @@ class Darknet(nn.Module):
                     x = outputs[i + layers[0]] # Get the output from the layer
                 else:
                     if layers[1] > 0: layers[1] -= i
-                    map1 = outputs[i + layers[0]]
-                    map2 = outputs[i + layers[1]]
-                    x = torch.cat((map1, map2), dim=1) # concatenate the channels [BCHW]
-            
+                    x = torch.cat((outputs[i + layers[0]], outputs[i + layers[1]]), dim=1) # concatenate the channels [BCHW]
+
             elif module_type == 'shortcut':
                 x = outputs[i-1] + outputs[i + int(module['from'])]
             
@@ -187,7 +183,4 @@ if __name__ == '__main__':
     d = Darknet('cfg/yolov3.cfg')
     print(f'Net initialized')
     out = d(a)
-    print(f'prediction done')
-    #print(out)
     print(out.shape)
-    print(write_results(out, .1, 80).shape)

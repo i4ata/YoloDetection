@@ -1,9 +1,4 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from torch.autograd import Variable
-
-import numpy as np
 
 from typing import List, Tuple, Literal, Union
 
@@ -11,11 +6,11 @@ def predict_transform(prediction: torch.Tensor, input_dim: int, anchors: List[Tu
     batch_size = len(prediction)
     stride = input_dim // prediction.shape[2] # The factor by which the input image is reduced
     grid_size = input_dim // stride # Size of the grid represented by a cell in the output
-    bbox_attributes = 5 + num_classes # x, y, w, h, confidence for an object, confidence for each class 
+    bbox_attributes = 5 + num_classes # x, y, w, h, objectness score, confidence for each class 
     num_anchors = len(anchors)
 
     prediction = prediction.view(batch_size, bbox_attributes * num_anchors, grid_size ** 2)
-    prediction = prediction.mT.contiguous()
+    prediction = prediction.transpose(1,2).contiguous()
     prediction = prediction.view(batch_size, num_anchors * grid_size ** 2, bbox_attributes)
 
     anchors = [(a1 / stride, a2 / stride) for a1, a2 in anchors]
