@@ -5,7 +5,7 @@ from torch.autograd import Variable
 
 import numpy as np
 
-from typing import List, Tuple
+from typing import List, Tuple, Literal, Union
 
 def predict_transform(prediction: torch.Tensor, input_dim: int, anchors: List[Tuple[int, int]], num_classes: int) -> torch.Tensor:
     batch_size = len(prediction)
@@ -14,8 +14,6 @@ def predict_transform(prediction: torch.Tensor, input_dim: int, anchors: List[Tu
     bbox_attributes = 5 + num_classes # x, y, w, h, confidence for an object, confidence for each class 
     num_anchors = len(anchors)
 
-    print(prediction.shape[1:])
-    print(bbox_attributes * num_anchors, grid_size ** 2)
     prediction = prediction.view(batch_size, bbox_attributes * num_anchors, grid_size ** 2)
     prediction = prediction.mT.contiguous()
     prediction = prediction.view(batch_size, num_anchors * grid_size ** 2, bbox_attributes)
@@ -44,3 +42,93 @@ def predict_transform(prediction: torch.Tensor, input_dim: int, anchors: List[Tu
     prediction[:, :, :4] *= stride
 
     return prediction
+
+def bbox_iou(box1: torch.Tensor, box2: torch.Tensor) -> torch.Tensor:
+    
+    b1_x1, b1_y1, b1_x2, b1_y2 = box1[:, 0], box1[:, 1], box1[:, 2], box1[:, 3]
+    b2_x1, b2_y1, b2_x2, b2_y2 = box2[:, 0], box2[:, 1], box2[:, 2], box2[:, 3]
+
+    inter_rect_x1 = torch.max(b1_x1, b2_x1)
+    inter_rect_y1 = torch.max(b1_y1, b2_y1)
+    inter_rect_x2 = torch.max(b1_x2, b2_x2)
+    inter_rect_y2 = torch.max(b1_y2, b2_y2)
+
+    inter_area = torch.clamp(inter_rect_x2 - inter_rect_x1 + 1, min=0) * \
+                 torch.clamp(inter_rect_y2 - inter_rect_y1 + 1, min=0)
+    
+    b1_area = (b1_x2 - b1_x1 + 1) * (b1_y2 - b1_y1 + 1)
+    b2_area = (b2_x2 - b2_x1 + 1) * (b2_y2 - b2_y1 + 1)
+
+    iou = inter_area / (b1_area + b2_area - inter_area)
+
+    return iou
+    
+def write_results(prediction: torch.Tensor, confidence: float, num_classes: int, nms_conf: float = .4) -> Union[torch.Tensor, Literal[0]]:
+    conf_mask = (prediction[:, :, 4] > confidence).float().unsqueeze(2)
+    prediction *= conf_mask
+
+    # x_center, y_center, height, width -> x_topleft, y_topleft, x_bottomright, y_bottomright
+    box_corner = torch.clone(prediction)
+    box_corner[:, :, 0] = (prediction[:, :, 0] - prediction[:, :, 2]) / 2
+    box_corner[:, :, 1] = (prediction[:, :, 1] - prediction[:, :, 3]) / 2
+    box_corner[:, :, 2] = (prediction[:, :, 0] + prediction[:, :, 2]) / 2
+    box_corner[:, :, 3] = (prediction[:, :, 1] + prediction[:, :, 3]) / 2
+    prediction[:, :, :4] = box_corner[:, :, :4]
+    
+    batch_size = len(prediction)
+    write = False
+
+    for i in range(batch_size):
+        image_pred = prediction[i]
+
+        max_conf, max_conf_score = torch.max(image_pred[:, 5:5+num_classes], 1)
+        max_conf = max_conf.float().unsqueeze(1)
+        max_conf_score = max_conf_score.float().unsqueeze(1)
+        image_pred = torch.cat((image_pred[:, :5], max_conf, max_conf_score), 1)
+
+        non_zero_ind = torch.nonzero(image_pred[:, 4])
+
+        try:
+            image_pred_ = image_pred[non_zero_ind.squeeze(),:].view(-1,7)
+        except:
+            continue
+        
+        if image_pred_.shape[0] == 0:
+            continue
+
+        img_classes: torch.Tensor = torch.unique(image_pred_[:, -1])
+
+        for cls in img_classes:
+            cls_mask = image_pred_ * (image_pred_[:, -1] == cls).float().unsqueeze(1)
+            class_mask_ind = torch.nonzero(cls_mask[:, -2]).squeeze()
+            image_pred_class = image_pred_[class_mask_ind].view(-1, 7)
+
+            conf_sort_index = torch.sort(image_pred_class[:, 4], descending=True)[1]
+            image_pred_class = image_pred_class[conf_sort_index]
+            idx = len(image_pred_class) # number of detections
+
+            for i in range(idx):
+                try:
+                    ious = bbox_iou(image_pred_class[i].unsqueeze(0), image_pred_class[i+1:])
+                except ValueError:
+                    break
+                except IndexError:
+                    break
+                iou_mask = (ious < nms_conf).float().unsqueeze(1)
+                image_pred_class[i+1:] *= iou_mask
+
+                non_zero_ind = torch.nonzero(image_pred_class[:, 4]).squeeze()
+                image_pred_class = image_pred_class[non_zero_ind].view(-1, 7)
+
+            batch_ind = torch.full(size=(len(image_pred_class), 1), fill_value=i, device=prediction.device)
+            seq = batch_ind, image_pred_class
+            if not write:
+                output = torch.cat(seq, 1)
+                write = True
+            else:
+                out = torch.cat(seq, 1)
+                output = torch.cat((output, out))
+    try:
+        return output
+    except:
+        return 0

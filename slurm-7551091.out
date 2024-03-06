@@ -1,0 +1,48 @@
+/home4/s4362675/env/lib/python3.9/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3526.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+imports done
+sampel image created
+Net initialized
+prediction done
+torch.Size([5, 22743, 85])
+torch.Size([1827, 8])
+
+###############################################################################
+Hábrók Cluster
+Job 7551091 for user s4362675
+Finished at: Wed Mar  6 17:07:44 CET 2024
+
+Job details:
+============
+
+Job ID              : 7551091
+Name                : yolo
+User                : s4362675
+Partition           : gpushort
+Nodes               : v100gpu34
+Number of Nodes     : 1
+Cores               : 8
+Number of Tasks     : 1
+State               : RUNNING
+Submit              : 2024-03-06T17:07:35
+Start               : 2024-03-06T17:07:36
+End                 : --
+Reserved walltime   : 00:01:00
+Used walltime       : 00:00:09
+Used CPU time       : --
+% User (Computation): --
+% System (I/O)      : --
+Mem reserved        : 8000M
+Max Mem (Node/step) : 0.00  (Node unknown, N/A)
+Full Max Mem usage  : 0.00  (Until last completed step)
+Total Disk Read     : 0.00  (Until last completed step)
+Total Disk Write    : 0.00  (Until last completed step)
+
+Acknowledgements:
+=================
+
+Please see this page for information about acknowledging Hábrók in your publications:
+
+https://wiki.hpc.rug.nl/habrok/introduction/scientific_output
+
+################################################################################

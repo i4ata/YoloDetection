@@ -5,7 +5,7 @@ from torch.autograd import Variable
 
 import numpy as np
 
-from utils import predict_transform
+from utils import predict_transform, write_results
 
 from typing import Dict, List, Tuple
 
@@ -116,7 +116,7 @@ def create_modules(blocks: List[Dict[str, str]]) -> Tuple[Dict[str, str], nn.Mod
             anchors = [int(x) for x in block['anchors'].split(',')]
             anchors = [(anchors[i], anchors[i+1]) for i in range(0, len(anchors), 2)]
             anchors = [anchors[i] for i in mask]
-
+            
             detection = DetectionLayer(anchors=anchors)
             module.add_module(f'Detection_{i}', detection)
         #print(out_filters)
@@ -188,5 +188,6 @@ if __name__ == '__main__':
     print(f'Net initialized')
     out = d(a)
     print(f'prediction done')
-    print(out)
+    #print(out)
     print(out.shape)
+    print(write_results(out, .1, 80).shape)
