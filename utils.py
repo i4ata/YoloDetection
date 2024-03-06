@@ -14,9 +14,11 @@ def predict_transform(prediction: torch.Tensor, input_dim: int, anchors: List[Tu
     bbox_attributes = 5 + num_classes # x, y, w, h, confidence for an object, confidence for each class 
     num_anchors = len(anchors)
 
+    print(prediction.shape[1:])
+    print(bbox_attributes * num_anchors, grid_size ** 2)
     prediction = prediction.view(batch_size, bbox_attributes * num_anchors, grid_size ** 2)
     prediction = prediction.mT.contiguous()
-    prediction = prediction.view(batch_size, grid_size * grid_size * num_anchors, bbox_attributes)
+    prediction = prediction.view(batch_size, num_anchors * grid_size ** 2, bbox_attributes)
 
     anchors = [(a1 / stride, a2 / stride) for a1, a2 in anchors]
 
@@ -26,12 +28,12 @@ def predict_transform(prediction: torch.Tensor, input_dim: int, anchors: List[Tu
     # Add the offsets to x and y
     grid = torch.arange(grid_size, device=prediction.device)
     a, b = torch.meshgrid(grid, grid)
-    x_offset, y_offset = a.view(-1, 1), b.view(-1, 1)
+    x_offset, y_offset = a.reshape(-1, 1), b.reshape(-1, 1)
     x_y_offset = torch.cat((x_offset, y_offset), dim=1).repeat(1, num_anchors).view(-1,2).unsqueeze(0)
     prediction[:, :, :2] += x_y_offset
 
     # Transform w and h
-    anchors: torch.Tensor = torch.FloatTensor(anchors, device=prediction.device)
+    anchors: torch.Tensor = torch.tensor(anchors, device=prediction.device)
     anchors = anchors.repeat(grid_size ** 2, 1).unsqueeze(0)
     prediction[:, :, 2:4] = torch.exp(prediction[:, :, 2:4]) * anchors
 

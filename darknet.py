@@ -88,9 +88,9 @@ def create_modules(blocks: List[Dict[str, str]]) -> Tuple[Dict[str, str], nn.Mod
         # Route layer
         elif block['type'] == 'route':
             # Implemented in forward
-            layers = block['layers'].split(',')
-            start = int(layers[0])
-            end = 0 if len(layers) == 1 else int(layers[1]) # get the end if there is one
+            block['layers'] = block['layers'].split(',')
+            start = int(block['layers'][0])
+            end = 0 if len(block['layers']) == 1 else int(block['layers'][1]) # get the end if there is one
 
             if start > 0: start -= i
             if end > 0: end -= i
@@ -130,11 +130,13 @@ class Darknet(nn.Module):
     def __init__(self, config_file: str) -> None:
         super(Darknet, self).__init__()
         self.blocks = parse_config(config_file=config_file)
-        self.net_info, self.module_list = create_modules(blocks=self.blocks)
 
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        self.net_info, self.module_list = create_modules(blocks=self.blocks)
+        self.module_list.to(device=self.device)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = x.to(self.device)
         modules = self.blocks[1:] # omit the overall information [net]
         outputs: Dict[str, torch.Tensor] = {} # store the outputs of the intermediate layers
 
@@ -180,7 +182,7 @@ class Darknet(nn.Module):
 
 if __name__ == '__main__':
     print(f'imports done')
-    a = torch.rand(5,3,416,416)
+    a = torch.rand(5,3,608,608)
     print(f'sampel image created')
     d = Darknet('cfg/yolov3.cfg')
     print(f'Net initialized')
