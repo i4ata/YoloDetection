@@ -1,0 +1,106 @@
+/home4/s4362675/env/lib/python3.9/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3526.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+imports done
+sampel image created
+Net initialized
+**************************************************
+In transformation of the model outputs. Goal: transform the model outputs to a meaningful format that is coherent with the original image
+Inputs: prediction -> torch.Size([5, 255, 19, 19]), input image dim -> 608, anchors -> [(116, 90), (156, 198), (373, 326)], number of classes: 80
+Definitions:
+Prediction shape: [batch size, bbox attributes * num anchors, feature map height, feature map width] -> torch.Size([5, 255, 19, 19])
+Stride: factor by which the input image is reduced: input image dim // feature map height = 32
+The size of a region in the original image represented by a single cell in the output feature map:                     Input image dim // stride = 19
+The number of attributes per 1 bbox: coordinates of its center (x,y) + dimensions (h,w) + objectness score (c)                      + class score (num_classes) = 85
+Number of anchors: 3
+1. Flatten the last 2 dimensions of the feature map: Prediction -> torch.Size([5, 255, 361])
+2. Swap feature map dimensions with the bboxes and anchors: Prediction -> torch.Size([5, 361, 255])
+3. Push the anchors to the feature map. That is, create (num anchors)-many feature maps
+4. Normalize the anchors so that they are coherent with the stride: [(3.625, 2.8125), (4.875, 6.1875), (11.65625, 10.1875)]
+5. Normalize the xs and ys of the boxes as well as the objectness score using sigmoid
+That is done since the xs and ys represent proportional offsets with respect to the anchors, not coordinates
+6. Add the offsets from the top left of the feature map to x and y according to the formula
+7. Do the logarithmic transform of w and h and multiply by the anchors dimensions according to the formula
+8. Normalize the class confidences by taking the sigmoid
+9. Scale x,y,w,h with the stride to obtain the dimensions with respect to the original image instead of the feature map
+!Return predictions [batch_size, num_anchors * feature_map_i, bbox_attributes] -> torch.Size([5, 1083, 85])!
+**************************************************
+In transformation of the model outputs. Goal: transform the model outputs to a meaningful format that is coherent with the original image
+Inputs: prediction -> torch.Size([5, 255, 38, 38]), input image dim -> 608, anchors -> [(30, 61), (62, 45), (59, 119)], number of classes: 80
+Definitions:
+Prediction shape: [batch size, bbox attributes * num anchors, feature map height, feature map width] -> torch.Size([5, 255, 38, 38])
+Stride: factor by which the input image is reduced: input image dim // feature map height = 16
+The size of a region in the original image represented by a single cell in the output feature map:                     Input image dim // stride = 38
+The number of attributes per 1 bbox: coordinates of its center (x,y) + dimensions (h,w) + objectness score (c)                      + class score (num_classes) = 85
+Number of anchors: 3
+1. Flatten the last 2 dimensions of the feature map: Prediction -> torch.Size([5, 255, 1444])
+2. Swap feature map dimensions with the bboxes and anchors: Prediction -> torch.Size([5, 1444, 255])
+3. Push the anchors to the feature map. That is, create (num anchors)-many feature maps
+4. Normalize the anchors so that they are coherent with the stride: [(1.875, 3.8125), (3.875, 2.8125), (3.6875, 7.4375)]
+5. Normalize the xs and ys of the boxes as well as the objectness score using sigmoid
+That is done since the xs and ys represent proportional offsets with respect to the anchors, not coordinates
+6. Add the offsets from the top left of the feature map to x and y according to the formula
+7. Do the logarithmic transform of w and h and multiply by the anchors dimensions according to the formula
+8. Normalize the class confidences by taking the sigmoid
+9. Scale x,y,w,h with the stride to obtain the dimensions with respect to the original image instead of the feature map
+!Return predictions [batch_size, num_anchors * feature_map_i, bbox_attributes] -> torch.Size([5, 4332, 85])!
+**************************************************
+In transformation of the model outputs. Goal: transform the model outputs to a meaningful format that is coherent with the original image
+Inputs: prediction -> torch.Size([5, 255, 76, 76]), input image dim -> 608, anchors -> [(10, 13), (16, 30), (33, 23)], number of classes: 80
+Definitions:
+Prediction shape: [batch size, bbox attributes * num anchors, feature map height, feature map width] -> torch.Size([5, 255, 76, 76])
+Stride: factor by which the input image is reduced: input image dim // feature map height = 8
+The size of a region in the original image represented by a single cell in the output feature map:                     Input image dim // stride = 76
+The number of attributes per 1 bbox: coordinates of its center (x,y) + dimensions (h,w) + objectness score (c)                      + class score (num_classes) = 85
+Number of anchors: 3
+1. Flatten the last 2 dimensions of the feature map: Prediction -> torch.Size([5, 255, 5776])
+2. Swap feature map dimensions with the bboxes and anchors: Prediction -> torch.Size([5, 5776, 255])
+3. Push the anchors to the feature map. That is, create (num anchors)-many feature maps
+4. Normalize the anchors so that they are coherent with the stride: [(1.25, 1.625), (2.0, 3.75), (4.125, 2.875)]
+5. Normalize the xs and ys of the boxes as well as the objectness score using sigmoid
+That is done since the xs and ys represent proportional offsets with respect to the anchors, not coordinates
+6. Add the offsets from the top left of the feature map to x and y according to the formula
+7. Do the logarithmic transform of w and h and multiply by the anchors dimensions according to the formula
+8. Normalize the class confidences by taking the sigmoid
+9. Scale x,y,w,h with the stride to obtain the dimensions with respect to the original image instead of the feature map
+!Return predictions [batch_size, num_anchors * feature_map_i, bbox_attributes] -> torch.Size([5, 17328, 85])!
+torch.Size([5, 22743, 85])
+
+###############################################################################
+Hábrók Cluster
+Job 7558849 for user s4362675
+Finished at: Thu Mar  7 12:12:54 CET 2024
+
+Job details:
+============
+
+Job ID              : 7558849
+Name                : yolo
+User                : s4362675
+Partition           : gpushort
+Nodes               : a100gpu3
+Number of Nodes     : 1
+Cores               : 8
+Number of Tasks     : 1
+State               : COMPLETED
+Submit              : 2024-03-07T12:12:43
+Start               : 2024-03-07T12:12:43
+End                 : 2024-03-07T12:12:54
+Reserved walltime   : 00:01:00
+Used walltime       : 00:00:11
+Used CPU time       : 00:00:06 (efficiency:  6.97%)
+% User (Computation): 66.80%
+% System (I/O)      : 33.19%
+Mem reserved        : 8000M
+Max Mem (Node/step) : 8.00K (a100gpu3, per node)
+Full Max Mem usage  : 8.00K
+Total Disk Read     : 2.28K
+Total Disk Write    : 2.00 
+
+Acknowledgements:
+=================
+
+Please see this page for information about acknowledging Hábrók in your publications:
+
+https://wiki.hpc.rug.nl/habrok/introduction/scientific_output
+
+################################################################################
