@@ -1,0 +1,50 @@
+Train loss 8.670149271231724, Test loss 7.142002641193328
+Train loss 5.874433063415892, Test loss 10.908971509625834
+Train loss 5.194361868132633, Test loss 8.803095147494346
+Train loss 4.656083827949615, Test loss 7.182848610224262
+Train loss 4.264263425215307, Test loss 6.61933416945319
+Train loss 3.9430808745532397, Test loss 6.230365791628437
+Train loss 3.6212622117236317, Test loss 6.544258652194854
+Train loss 3.2869686092513493, Test loss 6.5274401249424105
+Train loss 3.0024291395666114, Test loss 6.639763456198477
+Train loss 2.7884855089909526, Test loss 6.6970796806197015
+
+###############################################################################
+Hábrók Cluster
+Job 7632238 for user s4362675
+Finished at: Mon Mar 11 22:37:05 CET 2024
+
+Job details:
+============
+
+Job ID              : 7632238
+Name                : yolo
+User                : s4362675
+Partition           : gpushort
+Nodes               : a100gpu3
+Number of Nodes     : 1
+Cores               : 8
+Number of Tasks     : 1
+State               : COMPLETED
+Submit              : 2024-03-11T22:32:58
+Start               : 2024-03-11T22:32:59
+End                 : 2024-03-11T22:37:02
+Reserved walltime   : 01:00:00
+Used walltime       : 00:04:03
+Used CPU time       : 00:15:20 (efficiency: 47.34%)
+% User (Computation): 66.83%
+% System (I/O)      : 33.17%
+Mem reserved        : 8000M
+Max Mem (Node/step) : 1.06G (a100gpu3, per node)
+Full Max Mem usage  : 1.06G
+Total Disk Read     : 6.21G
+Total Disk Write    : 5.85M
+
+Acknowledgements:
+=================
+
+Please see this page for information about acknowledging Hábrók in your publications:
+
+https://wiki.hpc.rug.nl/habrok/introduction/scientific_output
+
+################################################################################

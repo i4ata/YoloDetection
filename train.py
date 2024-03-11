@@ -22,8 +22,8 @@ if __name__ == '__main__':
             y_pred = model(X)
             loss = loss_fn(y, y_pred)
             train_loss += loss.item()
-            loss.backward()
             optimizer.zero_grad()
+            loss.backward()
             optimizer.step()
         model.eval()
         for X, y in test_dataloader:

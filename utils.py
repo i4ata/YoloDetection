@@ -32,14 +32,21 @@ class YOLOv1Loss(nn.Module):
         self.lambda_noobj = .5
         
     def forward(self, y_true: torch.Tensor, y_pred: torch.Tensor) -> torch.Tensor:
-        # box_i: [n,7,7,5+C]
         box1, box2 = y_pred[:, :, :, :5], y_pred[:, :, :, 5:10]
         true_boxes = torch.zeros_like(box1)
         obj_mask, noobj_mask = y_true[:, :, :, 4] != 0, y_true[:, :, :, 4] == 0
         
-        box1_iou = iou(box1=box1[obj_mask], box2=true_boxes[obj_mask][:, :4])
-        box2_iou = iou(box1=box2[obj_mask], box2=true_boxes[obj_mask][:, :4])
-        true_boxes[obj_mask] = torch.where((box1_iou >= box2_iou).unsqueeze(-1), box1[obj_mask], box2[obj_mask])
+        # box1_iou = iou(box1=box1[obj_mask], box2=true_boxes[obj_mask][:, :4])
+        # box2_iou = iou(box1=box2[obj_mask], box2=true_boxes[obj_mask][:, :4])
+        true_boxes[obj_mask] = torch.where(
+            condition=(
+                iou(box1=box1[obj_mask], box2=true_boxes[obj_mask][:, :4]) 
+                >= 
+                iou(box1=box2[obj_mask], box2=true_boxes[obj_mask][:, :4])
+            ).unsqueeze(-1), 
+            input=box1[obj_mask], 
+            other=box2[obj_mask]
+        )
         
         return (
             self.lambda_coord * (

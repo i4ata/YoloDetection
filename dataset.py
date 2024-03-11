@@ -23,9 +23,9 @@ class YOLODataset(Dataset):
         return len(self.pascal_voc)
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        
         image, annotations = self.pascal_voc[index]
         boxes, labels = [], []
-        
         for object in annotations['annotation']['object']:
             boxes.append(list(map(int, object['bndbox'].values())))
             labels.append(object['name'])
@@ -39,17 +39,17 @@ class YOLODataset(Dataset):
         # Transform boxes from [x_min, y_min, x_max, y_max] to [x_center, y_center, width, height]
         boxes = torch.tensor(transform['bboxes']).float()
         x, y = (boxes[:, 0] + boxes[:, 2]) / 2, (boxes[:, 1] + boxes[:, 3]) / 2
-        normalized_x, normalized_y = torch.frac(x / 64), torch.frac(y / 64)
+        x, y = x / 64, y / 64
 
-        w, h =  boxes[:, 2] - boxes[:, 0],       boxes[:, 3] - boxes[:, 1]
-        normalized_w, normalized_h = w / self.image_size, h / self.image_size
+        w, h =  boxes[:, 2] - boxes[:, 0], boxes[:, 3] - boxes[:, 1]
+        w, h = w / self.image_size, h / self.image_size
 
         objectness_score = torch.ones(len(boxes))
         labels = torch.tensor(list(map(self.classes.index, transform['labels'])))
 
         feature_map = torch.zeros(7, 7, 6)
-        feature_map[(x // 64).long(), (y // 64).long()] = torch.stack(
-            (normalized_x, normalized_y, normalized_w, normalized_h, objectness_score, labels), dim=1
+        feature_map[torch.floor(x).long(), torch.floor(y).long()] = torch.stack(
+            (torch.frac(x), torch.frac(y), w, h, objectness_score, labels), dim=1
         )
 
         return image, feature_map
