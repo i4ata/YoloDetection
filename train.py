@@ -18,6 +18,7 @@ if __name__ == '__main__':
         model.train()
         train_loss, test_loss = 0, 0
         for X, y in train_dataloader:
+            X, y = X.to(device), y.to(device)
             y_pred = model(X)
             loss = loss_fn(y, y_pred)
             train_loss += loss.item()
@@ -27,6 +28,7 @@ if __name__ == '__main__':
         model.eval()
         for X, y in test_dataloader:
             with torch.inference_mode():
+                X, y = X.to(device), y.to(device)
                 y_pred = model(X)
                 loss = loss_fn(y, y_pred)
             test_loss += loss.item()
