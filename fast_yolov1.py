@@ -33,7 +33,18 @@ class FastYOLO1(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x).view(len(x), 7, 7, -1)
+        detections: torch.Tensor = self.net(x)
+        detections = detections.view(len(x), 7, 7, 30)
+        detections[:, :, :, :4] = detections[:, :, :, :4].sigmoid()
+        
+        # Add the offsets of x and y
+        grid = torch.arange(7, device=detections.device)
+        detections[:, :, :, [0,1]] += torch.stack(torch.meshgrid(grid, grid, indexing='xy'), dim=2)
+
+        # Scale w and h to input image dimensions
+        detections[:, :, :, [2,3]] *= 448
+        
+        return detections
     
 if __name__ == '__main__':
     yolo = FastYOLO1()
