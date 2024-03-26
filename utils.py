@@ -32,36 +32,44 @@ class YOLOv1Loss(nn.Module):
         self.lambda_noobj = .5
         
     def forward(self, y_true: torch.Tensor, y_pred: torch.Tensor) -> torch.Tensor:
+
+        # Extract the two bounding boxes per each cell [x,y,w,h,c]
         box1, box2 = y_pred[:, :, :, :5], y_pred[:, :, :, 5:10]
-        true_boxes = torch.zeros_like(box1)
+
+        # Get the two masks
         obj_mask, noobj_mask = y_true[:, :, :, 4] != 0, y_true[:, :, :, 4] == 0
         
-        # box1_iou = iou(box1=box1[obj_mask], box2=true_boxes[obj_mask][:, :4])
-        # box2_iou = iou(box1=box2[obj_mask], box2=true_boxes[obj_mask][:, :4])
+        # Compute iou between the predicted boxes and true ones
+        box1_iou = iou(box1=box1[obj_mask], box2=y_true[:, :, :, :4][obj_mask]) 
+        box2_iou = iou(box1=box2[obj_mask], box2=y_true[:, :, :, :4][obj_mask])
+
+        # Compute the true bounding boxes (the true box is the one with the higher iou)
+        true_boxes = torch.zeros_like(box1)
         true_boxes[obj_mask] = torch.where(
             condition=(
-                iou(box1=box1[obj_mask], box2=true_boxes[obj_mask][:, :4]) 
-                >= 
-                iou(box1=box2[obj_mask], box2=true_boxes[obj_mask][:, :4])
-            ).unsqueeze(-1), 
+                box1_iou > box2_iou
+            ).unsqueeze(-1),
             input=box1[obj_mask], 
             other=box2[obj_mask]
         )
+
+        # Transform the confidence scores
+        true_boxes[:,:,:,4][obj_mask] *= torch.max(box1_iou, box2_iou) # P(Object) * IOU
         
         return (
             self.lambda_coord * (
-                F.mse_loss(true_boxes[obj_mask][:, 0], y_true[obj_mask][:, 0]) +
-                F.mse_loss(true_boxes[obj_mask][:, 1], y_true[obj_mask][:, 1])
+                F.mse_loss(true_boxes[:, :, :, 0][obj_mask], y_true[:, :, :, 0][obj_mask]) +
+                F.mse_loss(true_boxes[:, :, :, 1][obj_mask], y_true[:, :, :, 1][obj_mask])
             ) + 
             self.lambda_coord * (
-                F.mse_loss(torch.sqrt(true_boxes[obj_mask][:, 2]), torch.sqrt(y_true[obj_mask][:, 2])) +
-                F.mse_loss(torch.sqrt(true_boxes[obj_mask][:, 3]), torch.sqrt(y_true[obj_mask][:, 3]))
+                F.mse_loss(torch.sqrt(true_boxes[:, :, :, 2][obj_mask]), torch.sqrt(y_true[:, :, :, 2][obj_mask])) +
+                F.mse_loss(torch.sqrt(true_boxes[:, :, :, 3][obj_mask]), torch.sqrt(y_true[:, :, :, 2][obj_mask]))
             ) + 
-            F.binary_cross_entropy_with_logits(true_boxes[noobj_mask][:, 4], y_true[noobj_mask][:, 4]) + 
+            F.binary_cross_entropy_with_logits(true_boxes[:, :, :, 4][obj_mask], y_true[:, :, :, 4][obj_mask]) + 
             self.lambda_noobj * (
-                F.binary_cross_entropy_with_logits(true_boxes[noobj_mask][:, 4], y_true[noobj_mask][:, 4])
+                F.binary_cross_entropy_with_logits(true_boxes[:, :, :, 4][noobj_mask], y_true[:, :, :, 4][noobj_mask])
             ) +
-            F.cross_entropy(y_pred[obj_mask][:, 10:], y_true[obj_mask][:, 5].long())
+            F.cross_entropy(y_pred[:, :, :, 10:][obj_mask], y_true[:, :, :, 5][obj_mask].long())
         )
         
 
