@@ -35,7 +35,7 @@ class FastYOLO1(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         detections: torch.Tensor = self.net(x)
         detections = detections.view(len(x), 7, 7, 30)
-        detections[:, :, :, :4] = detections[:, :, :, :4].sigmoid()
+        detections[..., :4].sigmoid_()
         
         return detections
     

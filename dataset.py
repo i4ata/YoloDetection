@@ -1,7 +1,7 @@
 from torchvision.datasets import VOCDetection
 from torch.utils.data import Dataset, DataLoader
 import albumentations as A
-from typing import Tuple, List
+from typing import Tuple
 import numpy as np
 import torch
 
@@ -14,10 +14,10 @@ class YOLODataset(Dataset):
             [A.Resize(self.image_size, self.image_size)],
             bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'])
         )
-        self.classes = ['person', 
+        self.classes = ('person', 
                         'bird', 'cat', 'cow', 'dog', 'horse', 'sheep',
                         'aeroplane', 'bicycle', 'boat', 'bus', 'car', 'motorbike', 'train',
-                        'bottle', 'chair', 'diningtable', 'pottedplant', 'sofa', 'tvmonitor']
+                        'bottle', 'chair', 'diningtable', 'pottedplant', 'sofa', 'tvmonitor')
 
     def __len__(self) -> int:
         return len(self.pascal_voc)
@@ -25,15 +25,16 @@ class YOLODataset(Dataset):
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         
         image, annotations = self.pascal_voc[index]
-        boxes, labels = [], []
-        for object in annotations['annotation']['object']:
-            boxes.append(list(map(int, object['bndbox'].values())))
-            labels.append(object['name'])
+        
+        boxes, labels = zip(*[
+            (list(map(int, object['bndbox'].values())), object['name']) 
+            for object in annotations['annotation']['object']
+        ])
         
         transform = self.transform(image=np.asarray(image), bboxes=boxes, labels=labels)
 
         # Setting up the image
-        image = torch.tensor(transform['image']).permute(2,0,1) / 255.
+        image = torch.from_numpy(transform['image']).permute(2,0,1) / 255.
 
         # Setting up the targets
         # Transform boxes from [x_min, y_min, x_max, y_max] to [x_center, y_center, width, height]
