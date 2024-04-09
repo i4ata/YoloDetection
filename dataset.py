@@ -1,9 +1,22 @@
-from torchvision.datasets import VOCDetection
-from torch.utils.data import Dataset, DataLoader
-import albumentations as A
-from typing import Tuple
-import numpy as np
 import torch
+from torch.utils.data import Dataset, DataLoader
+from torchvision.datasets import VOCDetection
+
+from lightning import LightningDataModule
+
+import albumentations as A
+import numpy as np
+
+from typing import Tuple
+import os
+
+def create_data_module(batch_size: int = 10, num_workers: int = os.cpu_count()) -> LightningDataModule:
+    return LightningDataModule.from_datasets(
+        train_dataset=YOLODataset(root='data/train'),
+        val_dataset=YOLODataset('data/test'),
+        batch_size=batch_size,
+        num_workers=num_workers
+    )
 
 class YOLODataset(Dataset):
     def __init__(self, root: str = 'data/train') -> None:
