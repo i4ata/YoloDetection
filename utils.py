@@ -25,36 +25,36 @@ def iou(box1: torch.Tensor, box2: torch.Tensor) -> torch.Tensor:
     return intersection / (union + 1e-6)
 
 class YOLOv1Loss(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, n_boxes: int = 2, n_classes: int = 20, lambda_coord: float = 5., lambda_noobj: float = .5) -> None:
         super(YOLOv1Loss, self).__init__()
         
-        self.lambda_coord = 5
-        self.lambda_noobj = .5
+        self.lambda_coord = lambda_coord
+        self.lambda_noobj = lambda_noobj
+        self.n_boxes = n_boxes
+        self.n_classes = n_classes
+        
+        self.boxes_dims = n_boxes * 5
+        self.output_dims = self.boxes_dims + n_classes
+
         
     def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
 
-        # Extract the two bounding boxes per each cell [x,y,w,h,c]
-        box1, box2 = y_pred[..., :5], y_pred[..., 5:10]
+        # Extract the bounding boxes [batch_size, S, S, B, 5]
+        boxes = y_pred[..., :self.boxes_dims].view(*y_pred.shape[:-1], self.n_boxes, 5)
+
+        # Compute ious [batch_size, S, S, B]
+        ious = torch.stack([iou(box1=boxes[..., i, :], box2=y_true[..., :4]) for i in range(self.n_boxes)], dim=-1)
+        
+        # Compute the true bounding boxes (the ones with the highest iou) [batch_size, S, S, 5]
+        true_boxes = torch.gather(
+            input=boxes, 
+            dim=3, 
+            index=ious.argmax(-1, keepdim=True).unsqueeze(-1).expand(-1,-1,-1,-1,5)
+        ).squeeze(3)
 
         # Get the 2 masks
         obj_mask = y_true[..., 4] != 0
         noobj_mask = ~obj_mask
-
-        # Compute iou between the predicted boxes and true ones
-        box1_iou = iou(box1=box1, box2=y_true[..., :4]) 
-        box2_iou = iou(box1=box2, box2=y_true[..., :4])
-
-        # Compute the true bounding boxes (the true box is the one with the higher iou)
-        true_boxes = torch.where(
-            condition=(
-                box1_iou > box2_iou
-            ).unsqueeze(-1),
-            input=box1, 
-            other=box2
-        )
-
-        # Transform the confidence scores
-        # true_boxes[:,:,:,4][obj_mask] *= torch.max(box1_iou, box2_iou) # P(Object) * IOU
 
         return (
             self.lambda_coord * (
@@ -62,14 +62,14 @@ class YOLOv1Loss(nn.Module):
                 F.mse_loss(true_boxes[..., 1][obj_mask], y_true[..., 1][obj_mask])
             ) + 
             self.lambda_coord * (
-                F.mse_loss(torch.sqrt(true_boxes[..., 2][obj_mask]), torch.sqrt(y_true[..., 2][obj_mask])) +
-                F.mse_loss(torch.sqrt(true_boxes[..., 3][obj_mask]), torch.sqrt(y_true[..., 2][obj_mask]))
+                F.mse_loss(true_boxes[..., 2][obj_mask].sqrt(), y_true[..., 2][obj_mask].sqrt()) +
+                F.mse_loss(true_boxes[..., 3][obj_mask].sqrt(), y_true[..., 2][obj_mask].sqrt())
             ) + 
             F.binary_cross_entropy(true_boxes[..., 4][obj_mask], y_true[..., 4][obj_mask]) + 
             self.lambda_noobj * (
                 F.binary_cross_entropy(true_boxes[..., 4][noobj_mask], y_true[..., 4][noobj_mask])
             ) +
-            F.cross_entropy(y_pred[..., 10:][obj_mask], y_true[..., 5][obj_mask].long())
+            F.cross_entropy(y_pred[..., self.boxes_dims:][obj_mask], y_true[..., 5][obj_mask].long())
         )
 
 if __name__ == '__main__':

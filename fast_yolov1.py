@@ -19,11 +19,17 @@ class ConvBlock(nn.Module):
         )
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.block(x)
-
-class FastYOLO1(nn.Module):
-    def __init__(self) -> None:
+    
+class FastYOLO1(LightningModule):
+    def __init__(self, n_boxes: int = 2, n_classes: int = 20) -> None:
         super(FastYOLO1, self).__init__()
         
+        self.n_boxes = n_boxes
+        self.n_classes = n_classes
+
+        self.boxes_dims = n_boxes * 5
+        self.output_dims = self.boxes_dims + n_classes
+
         pool = nn.MaxPool2d(2)
         self.net = nn.Sequential(
             ConvBlock(3, 16), pool, 
@@ -35,24 +41,17 @@ class FastYOLO1(nn.Module):
             ConvBlock(512, 1024),
             ConvBlock(1024, 256),
             nn.Flatten(),
-            nn.Linear(in_features=256 * 7 * 7, out_features=1470)
+            nn.Linear(in_features=256 * 7 * 7, out_features= 7 * 7 * self.output_dims)
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        detections: torch.Tensor = self.net(x)
-        detections = detections.view(len(x), 7, 7, 30)
-        detections[..., :10].sigmoid_()
-        
-        return detections
-    
-class DetectionModel(LightningModule):
-    def __init__(self) -> None:
-        super(DetectionModel, self).__init__()
-        self.yolo = FastYOLO1()
         self.loss_fn = YOLOv1Loss()
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.yolo(x)
+        detections: torch.Tensor = self.net(x)
+        detections = detections.view(len(x), 7, 7, self.output_dims)
+        detections[..., :self.boxes_dims].sigmoid_()
+        
+        return detections
     
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
         inputs, targets = batch
@@ -69,7 +68,7 @@ class DetectionModel(LightningModule):
         return loss
     
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        return torch.optim.Adam(params=self.yolo.parameters(), lr=.001)
+        return torch.optim.Adam(params=self.net.parameters(), lr=.001)
 
 if __name__ == '__main__':
     yolo = FastYOLO1()

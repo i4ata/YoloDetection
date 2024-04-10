@@ -62,8 +62,8 @@ class YOLODataset(Dataset):
         labels = torch.tensor(list(map(self.classes.index, transform['labels'])))
 
         feature_map = torch.zeros(7, 7, 6)
-        feature_map[torch.floor(x).long(), torch.floor(y).long()] = torch.stack(
-            (torch.frac(x), torch.frac(y), w, h, objectness_score, labels), dim=1
+        feature_map[x.long(), y.long()] = torch.stack(
+            (x.frac(), y.frac(), w, h, objectness_score, labels), dim=1
         )
 
         return image, feature_map
