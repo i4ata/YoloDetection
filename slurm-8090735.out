@@ -1,0 +1,144 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) 2023.01   2) StdEnv
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+`Trainer(overfit_batches=1)` was configured so 1 batch will be used.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name    | Type       | Params
+---------------------------------------
+0 | net     | Sequential | 27.1 M
+1 | loss_fn | YOLOv1Loss | 0     
+---------------------------------------
+27.1 M    Trainable params
+0         Non-trainable params
+27.1 M    Total params
+108.391   Total estimated model params size (MB)
+SLURM auto-requeueing enabled. Setting signal handlers.
+imports done
+model initialized
+datamodule initialized
+trainer intitialized
+/home4/s4362675/env/lib/python3.9/site-packages/lightning/pytorch/trainer/connectors/data_connector.py:268: You requested to overfit but enabled train dataloader shuffling. We are turning off the train dataloader shuffling for you.
+/home4/s4362675/env/lib/python3.9/site-packages/lightning/pytorch/loops/fit_loop.py:293: The number of training batches (1) is smaller than the logging interval Trainer(log_every_n_steps=50). Set a lower value for log_every_n_steps if you want to see logs for the training epoch.
+Sanity Checking: |          | 0/? [00:00<?, ?it/s]Sanity Checking:   0%|          | 0/1 [00:00<?, ?it/s]Sanity Checking DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s]Sanity Checking DataLoader 0: 100%|██████████| 1/1 [00:00<00:00,  1.81it/s]                                                                           Training: |          | 0/? [00:00<?, ?it/s]Training:   0%|          | 0/1 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/1 [00:00<?, ?it/s] Epoch 0: 100%|██████████| 1/1 [00:00<00:00,  1.07it/s]Epoch 0: 100%|██████████| 1/1 [00:00<00:00,  1.07it/s, v_num=8090735, train_loss=5.390]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 50.81it/s][A
+                                                                      [AEpoch 0: 100%|██████████| 1/1 [00:01<00:00,  0.84it/s, v_num=8090735, train_loss=5.390, val_loss=5.560]Epoch 0: 100%|██████████| 1/1 [00:01<00:00,  0.84it/s, v_num=8090735, train_loss=5.390, val_loss=5.560]Epoch 0:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=5.390, val_loss=5.560]        Epoch 1:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=5.390, val_loss=5.560]Epoch 1: 100%|██████████| 1/1 [00:00<00:00,  3.74it/s, v_num=8090735, train_loss=5.390, val_loss=5.560]Epoch 1: 100%|██████████| 1/1 [00:00<00:00,  3.61it/s, v_num=8090735, train_loss=2.080, val_loss=5.560]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 62.64it/s][A
+                                                                      [AEpoch 1: 100%|██████████| 1/1 [00:00<00:00,  1.77it/s, v_num=8090735, train_loss=2.080, val_loss=5.660]Epoch 1: 100%|██████████| 1/1 [00:00<00:00,  1.76it/s, v_num=8090735, train_loss=2.080, val_loss=5.660]Epoch 1:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=2.080, val_loss=5.660]        Epoch 2:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=2.080, val_loss=5.660]Epoch 2: 100%|██████████| 1/1 [00:00<00:00,  3.30it/s, v_num=8090735, train_loss=2.080, val_loss=5.660]Epoch 2: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s, v_num=8090735, train_loss=2.430, val_loss=5.660]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 54.45it/s][A
+                                                                      [AEpoch 2: 100%|██████████| 1/1 [00:00<00:00,  1.61it/s, v_num=8090735, train_loss=2.430, val_loss=7.540]Epoch 2: 100%|██████████| 1/1 [00:00<00:00,  1.60it/s, v_num=8090735, train_loss=2.430, val_loss=7.540]Epoch 2:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=2.430, val_loss=7.540]        Epoch 3:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=2.430, val_loss=7.540]Epoch 3: 100%|██████████| 1/1 [00:00<00:00,  3.21it/s, v_num=8090735, train_loss=2.430, val_loss=7.540]Epoch 3: 100%|██████████| 1/1 [00:00<00:00,  3.10it/s, v_num=8090735, train_loss=1.330, val_loss=7.540]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 66.46it/s][A
+                                                                      [AEpoch 3: 100%|██████████| 1/1 [00:00<00:00,  1.54it/s, v_num=8090735, train_loss=1.330, val_loss=10.70]Epoch 3: 100%|██████████| 1/1 [00:00<00:00,  1.54it/s, v_num=8090735, train_loss=1.330, val_loss=10.70]Epoch 3:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=1.330, val_loss=10.70]        Epoch 4:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=1.330, val_loss=10.70]Epoch 4: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s, v_num=8090735, train_loss=1.330, val_loss=10.70]Epoch 4: 100%|██████████| 1/1 [00:00<00:00,  3.23it/s, v_num=8090735, train_loss=1.310, val_loss=10.70]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 61.28it/s][A
+                                                                      [AEpoch 4: 100%|██████████| 1/1 [00:00<00:00,  1.63it/s, v_num=8090735, train_loss=1.310, val_loss=13.50]Epoch 4: 100%|██████████| 1/1 [00:00<00:00,  1.62it/s, v_num=8090735, train_loss=1.310, val_loss=13.50]Epoch 4:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=1.310, val_loss=13.50]        Epoch 5:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=1.310, val_loss=13.50]Epoch 5: 100%|██████████| 1/1 [00:00<00:00,  3.44it/s, v_num=8090735, train_loss=1.310, val_loss=13.50]Epoch 5: 100%|██████████| 1/1 [00:00<00:00,  3.33it/s, v_num=8090735, train_loss=1.180, val_loss=13.50]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 53.41it/s][A
+                                                                      [AEpoch 5: 100%|██████████| 1/1 [00:00<00:00,  1.72it/s, v_num=8090735, train_loss=1.180, val_loss=14.70]Epoch 5: 100%|██████████| 1/1 [00:00<00:00,  1.72it/s, v_num=8090735, train_loss=1.180, val_loss=14.70]Epoch 5:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=1.180, val_loss=14.70]        Epoch 6:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=1.180, val_loss=14.70]Epoch 6: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s, v_num=8090735, train_loss=1.180, val_loss=14.70]Epoch 6: 100%|██████████| 1/1 [00:00<00:00,  3.09it/s, v_num=8090735, train_loss=1.050, val_loss=14.70]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 65.95it/s][A
+                                                                      [AEpoch 6: 100%|██████████| 1/1 [00:00<00:00,  1.60it/s, v_num=8090735, train_loss=1.050, val_loss=14.90]Epoch 6: 100%|██████████| 1/1 [00:00<00:00,  1.60it/s, v_num=8090735, train_loss=1.050, val_loss=14.90]Epoch 6:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=1.050, val_loss=14.90]        Epoch 7:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=1.050, val_loss=14.90]Epoch 7: 100%|██████████| 1/1 [00:00<00:00,  3.54it/s, v_num=8090735, train_loss=1.050, val_loss=14.90]Epoch 7: 100%|██████████| 1/1 [00:00<00:00,  3.42it/s, v_num=8090735, train_loss=0.945, val_loss=14.90]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 51.28it/s][A
+                                                                      [AEpoch 7: 100%|██████████| 1/1 [00:00<00:00,  1.76it/s, v_num=8090735, train_loss=0.945, val_loss=14.50]Epoch 7: 100%|██████████| 1/1 [00:00<00:00,  1.74it/s, v_num=8090735, train_loss=0.945, val_loss=14.50]Epoch 7:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.945, val_loss=14.50]        Epoch 8:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.945, val_loss=14.50]Epoch 8: 100%|██████████| 1/1 [00:00<00:00,  3.37it/s, v_num=8090735, train_loss=0.945, val_loss=14.50]Epoch 8: 100%|██████████| 1/1 [00:00<00:00,  3.35it/s, v_num=8090735, train_loss=0.839, val_loss=14.50]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 46.59it/s][A
+                                                                      [AEpoch 8: 100%|██████████| 1/1 [00:00<00:00,  1.63it/s, v_num=8090735, train_loss=0.839, val_loss=14.10]Epoch 8: 100%|██████████| 1/1 [00:00<00:00,  1.62it/s, v_num=8090735, train_loss=0.839, val_loss=14.10]Epoch 8:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.839, val_loss=14.10]        Epoch 9:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.839, val_loss=14.10]Epoch 9: 100%|██████████| 1/1 [00:00<00:00,  3.34it/s, v_num=8090735, train_loss=0.839, val_loss=14.10]Epoch 9: 100%|██████████| 1/1 [00:00<00:00,  3.22it/s, v_num=8090735, train_loss=0.831, val_loss=14.10]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 60.09it/s][A
+                                                                      [AEpoch 9: 100%|██████████| 1/1 [00:00<00:00,  1.65it/s, v_num=8090735, train_loss=0.831, val_loss=15.10]Epoch 9: 100%|██████████| 1/1 [00:00<00:00,  1.65it/s, v_num=8090735, train_loss=0.831, val_loss=15.10]Epoch 9:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.831, val_loss=15.10]        Epoch 10:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.831, val_loss=15.10]Epoch 10: 100%|██████████| 1/1 [00:00<00:00,  3.19it/s, v_num=8090735, train_loss=0.831, val_loss=15.10]Epoch 10: 100%|██████████| 1/1 [00:00<00:00,  3.08it/s, v_num=8090735, train_loss=0.790, val_loss=15.10]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 69.23it/s][A
+                                                                      [AEpoch 10: 100%|██████████| 1/1 [00:00<00:00,  1.55it/s, v_num=8090735, train_loss=0.790, val_loss=16.20]Epoch 10: 100%|██████████| 1/1 [00:00<00:00,  1.54it/s, v_num=8090735, train_loss=0.790, val_loss=16.20]Epoch 10:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.790, val_loss=16.20]        Epoch 11:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.790, val_loss=16.20]Epoch 11: 100%|██████████| 1/1 [00:00<00:00,  3.33it/s, v_num=8090735, train_loss=0.790, val_loss=16.20]Epoch 11: 100%|██████████| 1/1 [00:00<00:00,  3.22it/s, v_num=8090735, train_loss=0.790, val_loss=16.20]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 63.55it/s][A
+                                                                      [AEpoch 11: 100%|██████████| 1/1 [00:00<00:00,  1.61it/s, v_num=8090735, train_loss=0.790, val_loss=16.70]Epoch 11: 100%|██████████| 1/1 [00:00<00:00,  1.60it/s, v_num=8090735, train_loss=0.790, val_loss=16.70]Epoch 11:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.790, val_loss=16.70]        Epoch 12:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.790, val_loss=16.70]Epoch 12: 100%|██████████| 1/1 [00:00<00:00,  3.62it/s, v_num=8090735, train_loss=0.790, val_loss=16.70]Epoch 12: 100%|██████████| 1/1 [00:00<00:00,  3.48it/s, v_num=8090735, train_loss=0.727, val_loss=16.70]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 57.72it/s][A
+                                                                      [AEpoch 12: 100%|██████████| 1/1 [00:00<00:00,  1.54it/s, v_num=8090735, train_loss=0.727, val_loss=17.70]Epoch 12: 100%|██████████| 1/1 [00:00<00:00,  1.54it/s, v_num=8090735, train_loss=0.727, val_loss=17.70]Epoch 12:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.727, val_loss=17.70]        Epoch 13:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.727, val_loss=17.70]Epoch 13: 100%|██████████| 1/1 [00:00<00:00,  3.53it/s, v_num=8090735, train_loss=0.727, val_loss=17.70]Epoch 13: 100%|██████████| 1/1 [00:00<00:00,  3.43it/s, v_num=8090735, train_loss=0.714, val_loss=17.70]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 59.83it/s][A
+                                                                      [AEpoch 13: 100%|██████████| 1/1 [00:00<00:00,  1.64it/s, v_num=8090735, train_loss=0.714, val_loss=18.80]Epoch 13: 100%|██████████| 1/1 [00:00<00:00,  1.63it/s, v_num=8090735, train_loss=0.714, val_loss=18.80]Epoch 13:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.714, val_loss=18.80]        Epoch 14:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8090735, train_loss=0.714, val_loss=18.80]Epoch 14: 100%|██████████| 1/1 [00:00<00:00,  3.63it/s, v_num=8090735, train_loss=0.714, val_loss=18.80]Epoch 14: 100%|██████████| 1/1 [00:00<00:00,  3.49it/s, v_num=8090735, train_loss=0.697, val_loss=18.80]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 62.92it/s][A
+`Trainer.fit` stopped: `max_epochs=15` reached.
+                                                                      [AEpoch 14: 100%|██████████| 1/1 [00:00<00:00,  1.58it/s, v_num=8090735, train_loss=0.697, val_loss=19.80]Epoch 14: 100%|██████████| 1/1 [00:00<00:00,  1.58it/s, v_num=8090735, train_loss=0.697, val_loss=19.80]Epoch 14: 100%|██████████| 1/1 [00:01<00:00,  0.53it/s, v_num=8090735, train_loss=0.697, val_loss=19.80]
+
+###############################################################################
+Hábrók Cluster
+Job 8090735 for user s4362675
+Finished at: Wed Apr 10 20:37:31 CEST 2024
+
+Job details:
+============
+
+Job ID              : 8090735
+Name                : yolo
+User                : s4362675
+Partition           : gpushort
+Nodes               : v100gpu32
+Number of Nodes     : 1
+Cores               : 8
+Number of Tasks     : 1
+State               : RUNNING
+Submit              : 2024-04-10T20:36:41
+Start               : 2024-04-10T20:36:42
+End                 : --
+Reserved walltime   : 00:10:00
+Used walltime       : 00:00:49
+Used CPU time       : --
+% User (Computation): --
+% System (I/O)      : --
+Mem reserved        : 8000M
+Max Mem (Node/step) : 0.00  (Node unknown, N/A)
+Full Max Mem usage  : 0.00  (Until last completed step)
+Total Disk Read     : 0.00  (Until last completed step)
+Total Disk Write    : 0.00  (Until last completed step)
+
+Acknowledgements:
+=================
+
+Please see this page for information about acknowledging Hábrók in your publications:
+
+https://wiki.hpc.rug.nl/habrok/introduction/scientific_output
+
+################################################################################

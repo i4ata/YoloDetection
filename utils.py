@@ -2,6 +2,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from torchvision.ops import nms, box_convert
+
+from typing import Tuple, List
+
+import numpy as np
+
+GRID = torch.stack(torch.meshgrid(torch.arange(7), torch.arange(7), indexing='ij'), dim=1)
+
 def iou(box1: torch.Tensor, box2: torch.Tensor) -> torch.Tensor:
     # [x,y,w,h]
     b1x1 = box1[..., 0] - box1[..., 2] / 2
@@ -71,6 +79,45 @@ class YOLOv1Loss(nn.Module):
             ) +
             F.cross_entropy(y_pred[..., self.boxes_dims:][obj_mask], y_true[..., 5][obj_mask].long())
         )
+
+def transform_to_yolo(image: np.ndarray, boxes: np.ndarray, labels: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor]:
+
+    # Setting up the image
+    image = torch.from_numpy(image).permute(2,0,1) / 255.
+
+    # Setting up the targets
+    # Transform boxes from [x_min, y_min, x_max, y_max] to [x_center, y_center, width, height]
+    boxes = torch.from_numpy(boxes).float()
+    x, y, w, h = box_convert(boxes=boxes, in_fmt='xyxy', out_fmt='cxcywh').T
+    x, y = x / 64, y / 64
+    w, h = w / 448, h / 448
+
+    objectness_score = torch.ones(len(boxes))
+    labels = torch.tensor(labels)
+
+    feature_map = torch.zeros(7, 7, 6)
+    feature_map[x.long(), y.long()] = torch.stack(
+        (x.frac(), y.frac(), w, h, objectness_score, labels), dim=1
+    )
+
+    return image, feature_map
+
+def transform_outputs(detections: torch.Tensor, confidence_threshold: float = .3, iou_threshold: float = .3) -> List[torch.Tensor]:
+    detections = [x[x[:, 4] < confidence_threshold] for x in detections]
+    detections = [
+        x[nms(
+            boxes=box_convert(boxes=x[:, :4], in_fmt='cxcywh', out_fmt='xyxy'), 
+            scores=x[:, 4], 
+            iou_threshold=iou_threshold
+        )]
+        for x in detections
+    ]
+    return detections
+
+def transform_from_yolo(detections: torch.Tensor) -> torch.Tensor:
+    detections[..., [0,1]] *= 64 * GRID
+    detections[..., [0,2]] *= 448
+    return detections.flatten(start_dim=1, end_dim=2)
 
 if __name__ == '__main__':
     torch.manual_seed(0)
