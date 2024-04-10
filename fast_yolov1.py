@@ -3,6 +3,12 @@
 import torch
 import torch.nn as nn
 
+from lightning import LightningModule
+
+from utils import YOLOv1Loss
+
+from typing import Tuple
+
 class ConvBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int) -> None:
         super(ConvBlock, self).__init__()
@@ -39,10 +45,39 @@ class FastYOLO1(nn.Module):
         
         return detections
     
+class DetectionModel(LightningModule):
+    def __init__(self) -> None:
+        super(DetectionModel, self).__init__()
+        self.yolo = FastYOLO1()
+        self.loss_fn = YOLOv1Loss()
+    
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.yolo(x)
+    
+    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
+        inputs, targets = batch
+        output = self(inputs)
+        print({'output': output, 'targets': targets})
+        loss = self.loss_fn(output, targets)
+        print(loss)
+        self.log('train_loss', loss, prog_bar=True)
+        return loss
+
+    def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
+        inputs, targets = batch
+        output = self(inputs)
+        loss = self.loss_fn(output, targets)
+        self.log('val_loss', loss, prog_bar=True)
+        return loss
+    
+    def configure_optimizers(self) -> torch.optim.Optimizer:
+        return torch.optim.Adam(params=self.yolo.parameters(), lr=.001)
+
 if __name__ == '__main__':
     yolo = FastYOLO1()
     im = torch.rand(5,3,448,448)
     out = yolo(im)
     print(sum(p.numel() for p in yolo.parameters()))
     print(out.shape)
+    print(out[..., :4])
     # print(yolo)

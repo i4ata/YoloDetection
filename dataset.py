@@ -13,7 +13,7 @@ import os
 def create_data_module(batch_size: int = 10, num_workers: int = os.cpu_count()) -> LightningDataModule:
     return LightningDataModule.from_datasets(
         train_dataset=YOLODataset(root='data/train'),
-        val_dataset=YOLODataset('data/test'),
+        val_dataset=YOLODataset(root='data/test'),
         batch_size=batch_size,
         num_workers=num_workers
     )
@@ -73,3 +73,4 @@ if __name__ == '__main__':
     d_loader = DataLoader(test_dataset, batch_size=2)
     x,y = next(iter(d_loader))
     print(x.shape, y.shape)
+    print(y[0])

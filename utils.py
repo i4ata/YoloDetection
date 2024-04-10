@@ -31,7 +31,7 @@ class YOLOv1Loss(nn.Module):
         self.lambda_coord = 5
         self.lambda_noobj = .5
         
-    def forward(self, y_true: torch.Tensor, y_pred: torch.Tensor) -> torch.Tensor:
+    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
 
         # Extract the two bounding boxes per each cell [x,y,w,h,c]
         box1, box2 = y_pred[..., :5], y_pred[..., 5:10]
@@ -78,5 +78,5 @@ if __name__ == '__main__':
     l = YOLOv1Loss()
     yt, yp = torch.rand(3,7,7,6), torch.rand(3,7,7,30)
     yt[:,:,:,4] = yt[:,:,:,4] > .5
-    loss = l(yt,yp)
+    loss = l(yp,yt)
     print(loss)
