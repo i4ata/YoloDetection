@@ -55,7 +55,7 @@ class YOLOv1Loss(nn.Module):
 
         # Transform the confidence scores
         # true_boxes[:,:,:,4][obj_mask] *= torch.max(box1_iou, box2_iou) # P(Object) * IOU
-        
+
         return (
             self.lambda_coord * (
                 F.mse_loss(true_boxes[..., 0][obj_mask], y_true[..., 0][obj_mask]) +
@@ -65,13 +65,12 @@ class YOLOv1Loss(nn.Module):
                 F.mse_loss(torch.sqrt(true_boxes[..., 2][obj_mask]), torch.sqrt(y_true[..., 2][obj_mask])) +
                 F.mse_loss(torch.sqrt(true_boxes[..., 3][obj_mask]), torch.sqrt(y_true[..., 2][obj_mask]))
             ) + 
-            F.binary_cross_entropy_with_logits(true_boxes[..., 4][obj_mask], y_true[..., 4][obj_mask]) + 
+            F.binary_cross_entropy(true_boxes[..., 4][obj_mask], y_true[..., 4][obj_mask]) + 
             self.lambda_noobj * (
-                F.binary_cross_entropy_with_logits(true_boxes[..., 4][noobj_mask], y_true[..., 4][noobj_mask])
+                F.binary_cross_entropy(true_boxes[..., 4][noobj_mask], y_true[..., 4][noobj_mask])
             ) +
             F.cross_entropy(y_pred[..., 10:][obj_mask], y_true[..., 5][obj_mask].long())
         )
-        
 
 if __name__ == '__main__':
     torch.manual_seed(0)

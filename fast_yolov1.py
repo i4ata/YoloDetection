@@ -41,7 +41,7 @@ class FastYOLO1(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         detections: torch.Tensor = self.net(x)
         detections = detections.view(len(x), 7, 7, 30)
-        detections[..., :4].sigmoid_()
+        detections[..., :10].sigmoid_()
         
         return detections
     
@@ -57,9 +57,7 @@ class DetectionModel(LightningModule):
     def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
         inputs, targets = batch
         output = self(inputs)
-        print({'output': output, 'targets': targets})
         loss = self.loss_fn(output, targets)
-        print(loss)
         self.log('train_loss', loss, prog_bar=True)
         return loss
 
@@ -79,5 +77,5 @@ if __name__ == '__main__':
     out = yolo(im)
     print(sum(p.numel() for p in yolo.parameters()))
     print(out.shape)
-    print(out[..., :4])
+    print(out[..., :10])
     # print(yolo)

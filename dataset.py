@@ -70,7 +70,7 @@ class YOLODataset(Dataset):
 
 if __name__ == '__main__':
     test_dataset = YOLODataset('data/train')
-    d_loader = DataLoader(test_dataset, batch_size=2)
+    d_loader = DataLoader(test_dataset, batch_size=10)
     x,y = next(iter(d_loader))
     print(x.shape, y.shape)
-    print(y[0])
+    #print(y[0])
