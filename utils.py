@@ -4,9 +4,7 @@ import torch.nn.functional as F
 
 from torchvision.ops import nms, box_convert
 
-from typing import Tuple, List
-
-import numpy as np
+from typing import List
 
 GRID = torch.stack(torch.meshgrid(torch.arange(7), torch.arange(7), indexing='ij'), dim=1)
 
@@ -45,7 +43,12 @@ class YOLOv1Loss(nn.Module):
         self.output_dims = self.boxes_dims + n_classes
 
         
-    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
+    def forward(self, y_pred: torch.Tensor, target_boxes: List[torch.Tensor], target_labels: List[torch.Tensor]) -> torch.Tensor:
+
+        # Transform targets to yolo coordinates
+        y_true = torch.stack(
+            [transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
+        )
 
         # Extract the bounding boxes [batch_size, S, S, B, 5]
         boxes = y_pred[..., :self.boxes_dims].view(*y_pred.shape[:-1], self.n_boxes, 5)
@@ -80,27 +83,20 @@ class YOLOv1Loss(nn.Module):
             F.cross_entropy(y_pred[..., self.boxes_dims:][obj_mask], y_true[..., 5][obj_mask].long())
         )
 
-def transform_to_yolo(image: np.ndarray, boxes: np.ndarray, labels: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor]:
+def transform_to_yolo(boxes: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
 
-    # Setting up the image
-    image = torch.from_numpy(image).permute(2,0,1) / 255.
-
-    # Setting up the targets
-    # Transform boxes from [x_min, y_min, x_max, y_max] to [x_center, y_center, width, height]
-    boxes = torch.from_numpy(boxes).float()
     x, y, w, h = box_convert(boxes=boxes, in_fmt='xyxy', out_fmt='cxcywh').T
     x, y = x / 64, y / 64
     w, h = w / 448, h / 448
 
-    objectness_score = torch.ones(len(boxes))
-    labels = torch.tensor(labels)
+    objectness_score = torch.ones(len(boxes), device=boxes.device)
 
     feature_map = torch.zeros(7, 7, 6)
     feature_map[x.long(), y.long()] = torch.stack(
         (x.frac(), y.frac(), w, h, objectness_score, labels), dim=1
     )
 
-    return image, feature_map
+    return feature_map
 
 def transform_outputs(detections: torch.Tensor, confidence_threshold: float = .3, iou_threshold: float = .3) -> List[torch.Tensor]:
     detections = [x[x[:, 4] < confidence_threshold] for x in detections]

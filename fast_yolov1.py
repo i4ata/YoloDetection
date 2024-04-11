@@ -7,7 +7,7 @@ from lightning import LightningModule
 
 from utils import YOLOv1Loss
 
-from typing import Tuple
+from typing import Tuple, List
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int) -> None:
@@ -53,17 +53,17 @@ class FastYOLO1(LightningModule):
         
         return detections
     
-    def training_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
-        inputs, targets = batch
+    def training_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
+        inputs, boxes, labels = batch
         output = self(inputs)
-        loss = self.loss_fn(output, targets)
+        loss = self.loss_fn(output, boxes, labels)
         self.log('train_loss', loss, prog_bar=True)
         return loss
 
-    def validation_step(self, batch: Tuple[torch.Tensor, torch.Tensor], batch_idx: int) -> torch.Tensor:
-        inputs, targets = batch
+    def validation_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
+        inputs, boxes, labels = batch
         output = self(inputs)
-        loss = self.loss_fn(output, targets)
+        loss = self.loss_fn(output, boxes, labels)
         self.log('val_loss', loss, prog_bar=True)
         return loss
     

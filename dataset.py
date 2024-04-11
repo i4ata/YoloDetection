@@ -1,3 +1,4 @@
+from lightning.pytorch.utilities.types import TRAIN_DATALOADERS
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.datasets import VOCDetection
@@ -7,18 +8,37 @@ from lightning import LightningDataModule
 import albumentations as A
 import numpy as np
 
-from typing import Tuple
+from typing import Tuple, List
 import os
 
-from utils import transform_to_yolo
+class YOLODataModule(LightningDataModule):
+    def __init__(self, batch_size: int = 10, num_workers: int = os.cpu_count()) -> None:
+        super().__init__()
+        self.batch_size = batch_size
+        self.num_workers = num_workers
+        self.train_dataset = YOLODataset('data/train')
+        self.test_dataset = YOLODataset('data/test')
 
-def create_data_module(batch_size: int = 10, num_workers: int = os.cpu_count()) -> LightningDataModule:
-    return LightningDataModule.from_datasets(
-        train_dataset=YOLODataset(root='data/train'),
-        val_dataset=YOLODataset(root='data/test'),
-        batch_size=batch_size,
-        num_workers=num_workers
-    )
+    def collate_fn(self, batch: List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]) -> Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]]:
+        images, boxes, labels = zip(*batch)
+        return torch.stack(images), boxes, labels
+    
+    def train_dataloader(self) -> DataLoader:
+        return DataLoader(
+            dataset=self.train_dataset, 
+            batch_size=self.batch_size, 
+            shuffle=True, 
+            num_workers=self.num_workers, 
+            collate_fn=self.collate_fn
+        )
+    
+    def val_dataloader(self) -> DataLoader:
+        return DataLoader(
+            dataset=self.test_dataset,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            collate_fn=self.collate_fn
+        )
 
 class YOLODataset(Dataset):
     def __init__(self, root: str = 'data/train') -> None:
@@ -45,15 +65,15 @@ class YOLODataset(Dataset):
         ])
         transform = self.transform(image=np.asarray(image), bboxes=boxes, labels=labels)
 
-        return transform_to_yolo(
-            image=transform['image'],
-            boxes=np.array(transform['bboxes']),
-            labels=list(map(self.classes.index, transform['labels']))
+        return (
+            torch.from_numpy(transform['image']).permute(2,0,1) / 255.,
+            torch.tensor(transform['bboxes']),
+            torch.tensor(list(map(self.classes.index, transform['labels'])))
         )
 
 if __name__ == '__main__':
-    test_dataset = YOLODataset('data/train')
-    d_loader = DataLoader(test_dataset, batch_size=1)
+    test_dataset = YOLODataModule(num_workers=3)
+    d_loader = test_dataset.train_dataloader()
     x,y = next(iter(d_loader))
     print(x.shape, y.shape)
     #print(y[0])
