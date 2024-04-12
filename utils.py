@@ -18,25 +18,25 @@ class YOLOv1Loss(nn.Module):
         y_true_shape: [batch_size, 7, 7, [cx,cy,w,h,1,i]], where i is the index of the class
         """
 
-
         # Get the 2 masks
         obj_mask = y_true[..., 4] != 0
         noobj_mask = ~obj_mask
 
         return (
-            self.lambda_coord * (
-                F.mse_loss(y_pred[..., 0][obj_mask], y_true[..., 0][obj_mask]) +
-                F.mse_loss(y_pred[..., 1][obj_mask], y_true[..., 1][obj_mask])
-            ) + 
-            self.lambda_coord * (
-                F.mse_loss(y_pred[..., 2][obj_mask].sqrt(), y_true[..., 2][obj_mask].sqrt()) +
-                F.mse_loss(y_pred[..., 3][obj_mask].sqrt(), y_true[..., 2][obj_mask].sqrt())
-            ) + 
-            F.binary_cross_entropy(y_pred[..., 4][obj_mask], y_true[..., 4][obj_mask]) + 
-            self.lambda_noobj * (
-                F.binary_cross_entropy(y_pred[..., 4][noobj_mask], y_true[..., 4][noobj_mask])
-            ) +
-            F.cross_entropy(y_pred[..., 5:][obj_mask], y_true[..., 5][obj_mask].long())
+            # x
+            self.lambda_coord * F.mse_loss(input=y_pred[..., 0][obj_mask], target=y_true[..., 0][obj_mask]) + 
+            # y
+            self.lambda_coord * F.mse_loss(input=y_pred[..., 1][obj_mask], target=y_true[..., 1][obj_mask]) + 
+            # w
+            self.lambda_coord * F.mse_loss(input=y_pred[..., 2][obj_mask].sqrt(), target=y_true[..., 2][obj_mask].sqrt()) + 
+            # h
+            self.lambda_coord * F.mse_loss(input=y_pred[..., 3][obj_mask].sqrt(), target=y_true[..., 3][obj_mask].sqrt()) + 
+            # c_obj
+            F.mse_loss(input=y_pred[..., 4][obj_mask], target=y_true[..., 4][obj_mask]) + 
+            # c_noobj
+            self.lambda_noobj * F.mse_loss(input=y_pred[..., 4][noobj_mask], target=y_true[..., 4][noobj_mask]) + 
+            # C
+            F.mse_loss(input=y_pred[..., 5:][obj_mask], target=F.one_hot(y_true[..., 5][obj_mask].long(), num_classes=y_pred.size(-1) - 5).float())
         )
 
 def transform_outputs(detections: torch.Tensor, confidence_threshold: float = .3, iou_threshold: float = .3) -> List[torch.Tensor]:

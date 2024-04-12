@@ -10,7 +10,6 @@ from utils import YOLOv1Loss
 
 from typing import Tuple, List
 
-
 class ConvBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int) -> None:
         super(ConvBlock, self).__init__()
@@ -52,14 +51,14 @@ class FastYOLO1(LightningModule):
         self.box_convert_func = torch.vmap(torch.vmap(torch.vmap(box_convert)))
 
         # This is a [7,7,2] grid, where the [i,j]-th cell is equal to [i,j]
-        self.grid = torch.stack(torch.meshgrid(torch.arange(7), torch.arange(7), indexing='ij'), dim=-1)
-
+        self.grid = torch.stack(torch.meshgrid(torch.arange(7), torch.arange(7), indexing='ij'), dim=-1).to(self.device)
         self.losses = {'train': [], 'val': []}
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         detections: torch.Tensor = self.net(x)
         detections = detections.view(len(x), 7, 7, self.output_dims)
-        detections[..., :self.boxes_dims].sigmoid_()
+        detections[..., :self.boxes_dims] = detections[..., :self.boxes_dims].sigmoid()
+        detections[..., self.boxes_dims:] = detections[..., self.boxes_dims:].softmax(-1)
         
         return detections
     
@@ -86,8 +85,8 @@ class FastYOLO1(LightningModule):
     def _transform_to_yolo(self, boxes: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
 
         x, y, w, h = boxes.T
-        x, y = x / 64, y / 64
-        w, h = w / 448, h / 448
+        x, y = x / 64., y / 64.
+        w, h = w / 448., h / 448.
 
         objectness_score = torch.ones(len(boxes), device=boxes.device)
 
@@ -99,28 +98,29 @@ class FastYOLO1(LightningModule):
         return feature_map
 
     def _transform_from_yolo(self, detections: torch.Tensor) -> torch.Tensor:
-        detections[..., [0,1]] *= 64 * self.grid.to(detections.device)
+        detections[..., [0,1]] = (detections[..., [0,1]] + self.grid.to(detections.device)) * 64
         detections[..., [0,2]] *= 448
         return detections.flatten(start_dim=1, end_dim=2)
 
-    def _get_map(self, detections: torch.Tensor, target_boxes: List[torch.Tensor], target_labels: List[torch.Tensor]):
+    def _get_map(self, detections: torch.Tensor, target_boxes: List[torch.Tensor], target_labels: List[torch.Tensor], flag: bool = True):
 
         pred_boxes = self._transform_from_yolo(detections=detections.detach())
-        self.map.update(
-            preds=[{
-                'boxes': x[..., :4], 
-                'scores': x[..., 4], 
-                'labels': x[..., 5:].argmax(-1)} 
-            for x in pred_boxes],
-            
-            target=[{
-                'boxes': boxes, 
-                'labels': labels} 
-            for boxes, labels in zip(target_boxes, target_labels)]
-        )
+
+        preds = [{
+            'boxes': x[..., :4],
+            'scores': x[..., 4],
+            'labels': x[..., 5:].argmax(-1)
+        } for x in pred_boxes]
+        
+        targets = [{
+            'boxes': boxes,
+            'labels': labels
+        } for boxes, labels in zip(target_boxes, target_labels)]
+
+        self.map.update(preds=preds, target=targets)
 
     def training_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
-        
+
         inputs, target_boxes, target_labels = batch
         y_pred: torch.Tensor = self(inputs)
 
@@ -139,7 +139,6 @@ class FastYOLO1(LightningModule):
         return loss
 
     def validation_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
-
         inputs, target_boxes, target_labels = batch
         y_pred: torch.Tensor = self(inputs)
 
@@ -152,7 +151,7 @@ class FastYOLO1(LightningModule):
 
         loss = self.loss_fn(detections, y_true)
         self.losses['val'].append(loss)
-        self._get_map(detections=detections, target_boxes=target_boxes, target_labels=target_labels)
+        self._get_map(detections=detections, target_boxes=target_boxes, target_labels=target_labels, flag=False)
 
         return loss
 

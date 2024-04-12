@@ -1,0 +1,170 @@
+The following modules were not unloaded:
+  (Use "module --force purge" to unload all):
+
+  1) 2023.01   2) StdEnv
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+IPU available: False, using: 0 IPUs
+HPU available: False, using: 0 HPUs
+`Trainer(overfit_batches=1)` was configured so 1 batch will be used.
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name    | Type                 | Params
+-------------------------------------------------
+0 | net     | Sequential           | 27.1 M
+1 | loss_fn | YOLOv1Loss           | 0     
+2 | map     | MeanAveragePrecision | 0     
+-------------------------------------------------
+27.1 M    Trainable params
+0         Non-trainable params
+27.1 M    Total params
+108.391   Total estimated model params size (MB)
+SLURM auto-requeueing enabled. Setting signal handlers.
+imports done
+model initialized
+datamodule initialized
+trainer intitialized
+Sanity Checking: |          | 0/? [00:00<?, ?it/s]Sanity Checking:   0%|          | 0/1 [00:00<?, ?it/s]Sanity Checking DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s]Sanity Checking DataLoader 0: 100%|██████████| 1/1 [00:00<00:00,  1.11it/s]                                                                           Training: |          | 0/? [00:00<?, ?it/s]Training:   0%|          | 0/1 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/1 [00:00<?, ?it/s] Epoch 0: 100%|██████████| 1/1 [00:00<00:00,  1.83it/s]Epoch 0: 100%|██████████| 1/1 [00:00<00:00,  1.82it/s, v_num=8138887]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.14it/s][A
+/home4/s4362675/env/lib/python3.9/site-packages/torchmetrics/utilities/prints.py:43: UserWarning: The ``compute`` method of metric MeanAveragePrecision was called before the ``update`` method which may lead to errors, as metric states have not yet been updated.
+  warnings.warn(*args, **kwargs)  # noqa: B028
+                                                                      [AEpoch 0: 100%|██████████| 1/1 [00:00<00:00,  1.02it/s, v_num=8138887, val_loss=1.950, val_map=0.000]Epoch 0: 100%|██████████| 1/1 [00:00<00:00,  1.02it/s, v_num=8138887, val_loss=1.950, val_map=0.000]Epoch 0:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=1.950, val_map=0.000]        Epoch 1:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=1.950, val_map=0.000]Epoch 1: 100%|██████████| 1/1 [00:00<00:00,  3.54it/s, v_num=8138887, val_loss=1.950, val_map=0.000]Epoch 1: 100%|██████████| 1/1 [00:00<00:00,  3.53it/s, v_num=8138887, val_loss=1.950, val_map=0.000, train_loss=1.620, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 24.68it/s][A
+                                                                      [AEpoch 1: 100%|██████████| 1/1 [00:00<00:00,  1.33it/s, v_num=8138887, val_loss=1.970, val_map=0.000, train_loss=1.620, train_map=-1.00]Epoch 1: 100%|██████████| 1/1 [00:00<00:00,  1.32it/s, v_num=8138887, val_loss=1.970, val_map=0.000, train_loss=1.620, train_map=-1.00]Epoch 1:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=1.970, val_map=0.000, train_loss=1.620, train_map=-1.00]        Epoch 2:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=1.970, val_map=0.000, train_loss=1.620, train_map=-1.00]Epoch 2: 100%|██████████| 1/1 [00:00<00:00,  3.56it/s, v_num=8138887, val_loss=1.970, val_map=0.000, train_loss=1.620, train_map=-1.00]Epoch 2: 100%|██████████| 1/1 [00:00<00:00,  3.55it/s, v_num=8138887, val_loss=1.970, val_map=0.000, train_loss=1.320, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.45it/s][A
+                                                                      [AEpoch 2: 100%|██████████| 1/1 [00:00<00:00,  1.35it/s, v_num=8138887, val_loss=2.190, val_map=0.000, train_loss=1.320, train_map=-1.00]Epoch 2: 100%|██████████| 1/1 [00:00<00:00,  1.34it/s, v_num=8138887, val_loss=2.190, val_map=0.000, train_loss=1.320, train_map=-1.00]Epoch 2:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.190, val_map=0.000, train_loss=1.320, train_map=-1.00]        Epoch 3:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.190, val_map=0.000, train_loss=1.320, train_map=-1.00]Epoch 3: 100%|██████████| 1/1 [00:00<00:00,  3.78it/s, v_num=8138887, val_loss=2.190, val_map=0.000, train_loss=1.320, train_map=-1.00]Epoch 3: 100%|██████████| 1/1 [00:00<00:00,  3.77it/s, v_num=8138887, val_loss=2.190, val_map=0.000, train_loss=1.800, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.68it/s][A
+                                                                      [AEpoch 3: 100%|██████████| 1/1 [00:00<00:00,  1.34it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.800, train_map=-1.00]Epoch 3: 100%|██████████| 1/1 [00:00<00:00,  1.33it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.800, train_map=-1.00]Epoch 3:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.800, train_map=-1.00]        Epoch 4:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.800, train_map=-1.00]Epoch 4: 100%|██████████| 1/1 [00:00<00:00,  3.59it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.800, train_map=-1.00]Epoch 4: 100%|██████████| 1/1 [00:00<00:00,  3.58it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=0.941, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 27.01it/s][A
+                                                                      [AEpoch 4: 100%|██████████| 1/1 [00:00<00:00,  1.08it/s, v_num=8138887, val_loss=2.810, val_map=0.000, train_loss=0.941, train_map=-1.00]Epoch 4: 100%|██████████| 1/1 [00:00<00:00,  1.07it/s, v_num=8138887, val_loss=2.810, val_map=0.000, train_loss=0.941, train_map=-1.00]Epoch 4:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.810, val_map=0.000, train_loss=0.941, train_map=-1.00]        Epoch 5:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.810, val_map=0.000, train_loss=0.941, train_map=-1.00]Epoch 5: 100%|██████████| 1/1 [00:00<00:00,  3.73it/s, v_num=8138887, val_loss=2.810, val_map=0.000, train_loss=0.941, train_map=-1.00]Epoch 5: 100%|██████████| 1/1 [00:00<00:00,  3.72it/s, v_num=8138887, val_loss=2.810, val_map=0.000, train_loss=1.040, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.44it/s][A
+                                                                      [AEpoch 5: 100%|██████████| 1/1 [00:00<00:00,  1.35it/s, v_num=8138887, val_loss=2.720, val_map=0.000, train_loss=1.040, train_map=-1.00]Epoch 5: 100%|██████████| 1/1 [00:00<00:00,  1.34it/s, v_num=8138887, val_loss=2.720, val_map=0.000, train_loss=1.040, train_map=-1.00]Epoch 5:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.720, val_map=0.000, train_loss=1.040, train_map=-1.00]        Epoch 6:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.720, val_map=0.000, train_loss=1.040, train_map=-1.00]Epoch 6: 100%|██████████| 1/1 [00:00<00:00,  3.65it/s, v_num=8138887, val_loss=2.720, val_map=0.000, train_loss=1.040, train_map=-1.00]Epoch 6: 100%|██████████| 1/1 [00:00<00:00,  3.64it/s, v_num=8138887, val_loss=2.720, val_map=0.000, train_loss=1.060, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 25.69it/s][A
+                                                                      [AEpoch 6: 100%|██████████| 1/1 [00:00<00:00,  1.38it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.060, train_map=-1.00]Epoch 6: 100%|██████████| 1/1 [00:00<00:00,  1.37it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.060, train_map=-1.00]Epoch 6:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.060, train_map=-1.00]        Epoch 7:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.060, train_map=-1.00]Epoch 7: 100%|██████████| 1/1 [00:00<00:00,  3.75it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=1.060, train_map=-1.00]Epoch 7: 100%|██████████| 1/1 [00:00<00:00,  3.74it/s, v_num=8138887, val_loss=2.590, val_map=0.000, train_loss=0.847, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.03it/s][A
+                                                                      [AEpoch 7: 100%|██████████| 1/1 [00:00<00:00,  1.35it/s, v_num=8138887, val_loss=2.460, val_map=0.000, train_loss=0.847, train_map=-1.00]Epoch 7: 100%|██████████| 1/1 [00:00<00:00,  1.34it/s, v_num=8138887, val_loss=2.460, val_map=0.000, train_loss=0.847, train_map=-1.00]Epoch 7:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.460, val_map=0.000, train_loss=0.847, train_map=-1.00]        Epoch 8:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.460, val_map=0.000, train_loss=0.847, train_map=-1.00]Epoch 8: 100%|██████████| 1/1 [00:00<00:00,  3.76it/s, v_num=8138887, val_loss=2.460, val_map=0.000, train_loss=0.847, train_map=-1.00]Epoch 8: 100%|██████████| 1/1 [00:00<00:00,  3.75it/s, v_num=8138887, val_loss=2.460, val_map=0.000, train_loss=0.699, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.77it/s][A
+                                                                      [AEpoch 8: 100%|██████████| 1/1 [00:00<00:00,  1.37it/s, v_num=8138887, val_loss=2.390, val_map=0.000, train_loss=0.699, train_map=-1.00]Epoch 8: 100%|██████████| 1/1 [00:00<00:00,  1.36it/s, v_num=8138887, val_loss=2.390, val_map=0.000, train_loss=0.699, train_map=-1.00]Epoch 8:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.390, val_map=0.000, train_loss=0.699, train_map=-1.00]        Epoch 9:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.390, val_map=0.000, train_loss=0.699, train_map=-1.00]Epoch 9: 100%|██████████| 1/1 [00:00<00:00,  3.69it/s, v_num=8138887, val_loss=2.390, val_map=0.000, train_loss=0.699, train_map=-1.00]Epoch 9: 100%|██████████| 1/1 [00:00<00:00,  3.68it/s, v_num=8138887, val_loss=2.390, val_map=0.000, train_loss=0.736, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.28it/s][A
+                                                                      [AEpoch 9: 100%|██████████| 1/1 [00:00<00:00,  1.35it/s, v_num=8138887, val_loss=2.320, val_map=0.000, train_loss=0.736, train_map=-1.00]Epoch 9: 100%|██████████| 1/1 [00:00<00:00,  1.34it/s, v_num=8138887, val_loss=2.320, val_map=0.000, train_loss=0.736, train_map=-1.00]Epoch 9:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.320, val_map=0.000, train_loss=0.736, train_map=-1.00]        Epoch 10:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.320, val_map=0.000, train_loss=0.736, train_map=-1.00]Epoch 10: 100%|██████████| 1/1 [00:00<00:00,  3.63it/s, v_num=8138887, val_loss=2.320, val_map=0.000, train_loss=0.736, train_map=-1.00]Epoch 10: 100%|██████████| 1/1 [00:00<00:00,  3.62it/s, v_num=8138887, val_loss=2.320, val_map=0.000, train_loss=0.688, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.13it/s][A
+                                                                      [AEpoch 10: 100%|██████████| 1/1 [00:00<00:00,  1.37it/s, v_num=8138887, val_loss=2.250, val_map=0.000, train_loss=0.688, train_map=-1.00]Epoch 10: 100%|██████████| 1/1 [00:00<00:00,  1.36it/s, v_num=8138887, val_loss=2.250, val_map=0.000, train_loss=0.688, train_map=-1.00]Epoch 10:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.250, val_map=0.000, train_loss=0.688, train_map=-1.00]        Epoch 11:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.250, val_map=0.000, train_loss=0.688, train_map=-1.00]Epoch 11: 100%|██████████| 1/1 [00:00<00:00,  3.78it/s, v_num=8138887, val_loss=2.250, val_map=0.000, train_loss=0.688, train_map=-1.00]Epoch 11: 100%|██████████| 1/1 [00:00<00:00,  3.77it/s, v_num=8138887, val_loss=2.250, val_map=0.000, train_loss=0.652, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 20.48it/s][A
+                                                                      [AEpoch 11: 100%|██████████| 1/1 [00:00<00:00,  1.37it/s, v_num=8138887, val_loss=2.150, val_map=0.000, train_loss=0.652, train_map=-1.00]Epoch 11: 100%|██████████| 1/1 [00:00<00:00,  1.36it/s, v_num=8138887, val_loss=2.150, val_map=0.000, train_loss=0.652, train_map=-1.00]Epoch 11:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.150, val_map=0.000, train_loss=0.652, train_map=-1.00]        Epoch 12:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.150, val_map=0.000, train_loss=0.652, train_map=-1.00]Epoch 12: 100%|██████████| 1/1 [00:00<00:00,  3.64it/s, v_num=8138887, val_loss=2.150, val_map=0.000, train_loss=0.652, train_map=-1.00]Epoch 12: 100%|██████████| 1/1 [00:00<00:00,  3.64it/s, v_num=8138887, val_loss=2.150, val_map=0.000, train_loss=0.629, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.14it/s][A
+                                                                      [AEpoch 12: 100%|██████████| 1/1 [00:00<00:00,  1.36it/s, v_num=8138887, val_loss=2.100, val_map=0.000, train_loss=0.629, train_map=-1.00]Epoch 12: 100%|██████████| 1/1 [00:00<00:00,  1.35it/s, v_num=8138887, val_loss=2.100, val_map=0.000, train_loss=0.629, train_map=-1.00]Epoch 12:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.100, val_map=0.000, train_loss=0.629, train_map=-1.00]        Epoch 13:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.100, val_map=0.000, train_loss=0.629, train_map=-1.00]Epoch 13: 100%|██████████| 1/1 [00:00<00:00,  3.57it/s, v_num=8138887, val_loss=2.100, val_map=0.000, train_loss=0.629, train_map=-1.00]Epoch 13: 100%|██████████| 1/1 [00:00<00:00,  3.57it/s, v_num=8138887, val_loss=2.100, val_map=0.000, train_loss=0.648, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.15it/s][A
+                                                                      [AEpoch 13: 100%|██████████| 1/1 [00:00<00:00,  1.30it/s, v_num=8138887, val_loss=2.070, val_map=0.000, train_loss=0.648, train_map=-1.00]Epoch 13: 100%|██████████| 1/1 [00:00<00:00,  1.30it/s, v_num=8138887, val_loss=2.070, val_map=0.000, train_loss=0.648, train_map=-1.00]Epoch 13:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.070, val_map=0.000, train_loss=0.648, train_map=-1.00]        Epoch 14:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.070, val_map=0.000, train_loss=0.648, train_map=-1.00]Epoch 14: 100%|██████████| 1/1 [00:00<00:00,  3.59it/s, v_num=8138887, val_loss=2.070, val_map=0.000, train_loss=0.648, train_map=-1.00]Epoch 14: 100%|██████████| 1/1 [00:00<00:00,  3.58it/s, v_num=8138887, val_loss=2.070, val_map=0.000, train_loss=0.635, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 25.91it/s][A
+                                                                      [AEpoch 14: 100%|██████████| 1/1 [00:00<00:00,  1.28it/s, v_num=8138887, val_loss=2.120, val_map=0.000, train_loss=0.635, train_map=-1.00]Epoch 14: 100%|██████████| 1/1 [00:00<00:00,  1.27it/s, v_num=8138887, val_loss=2.120, val_map=0.000, train_loss=0.635, train_map=-1.00]Epoch 14:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.120, val_map=0.000, train_loss=0.635, train_map=-1.00]        Epoch 15:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.120, val_map=0.000, train_loss=0.635, train_map=-1.00]Epoch 15: 100%|██████████| 1/1 [00:00<00:00,  3.77it/s, v_num=8138887, val_loss=2.120, val_map=0.000, train_loss=0.635, train_map=-1.00]Epoch 15: 100%|██████████| 1/1 [00:00<00:00,  3.76it/s, v_num=8138887, val_loss=2.120, val_map=0.000, train_loss=0.593, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 25.83it/s][A
+                                                                      [AEpoch 15: 100%|██████████| 1/1 [00:00<00:00,  1.32it/s, v_num=8138887, val_loss=2.200, val_map=0.000, train_loss=0.593, train_map=-1.00]Epoch 15: 100%|██████████| 1/1 [00:00<00:00,  1.31it/s, v_num=8138887, val_loss=2.200, val_map=0.000, train_loss=0.593, train_map=-1.00]Epoch 15:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.200, val_map=0.000, train_loss=0.593, train_map=-1.00]        Epoch 16:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.200, val_map=0.000, train_loss=0.593, train_map=-1.00]Epoch 16: 100%|██████████| 1/1 [00:00<00:00,  3.55it/s, v_num=8138887, val_loss=2.200, val_map=0.000, train_loss=0.593, train_map=-1.00]Epoch 16: 100%|██████████| 1/1 [00:00<00:00,  3.55it/s, v_num=8138887, val_loss=2.200, val_map=0.000, train_loss=0.594, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 25.87it/s][A
+                                                                      [AEpoch 16: 100%|██████████| 1/1 [00:00<00:00,  1.34it/s, v_num=8138887, val_loss=2.260, val_map=0.000, train_loss=0.594, train_map=-1.00]Epoch 16: 100%|██████████| 1/1 [00:00<00:00,  1.33it/s, v_num=8138887, val_loss=2.260, val_map=0.000, train_loss=0.594, train_map=-1.00]Epoch 16:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.260, val_map=0.000, train_loss=0.594, train_map=-1.00]        Epoch 17:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.260, val_map=0.000, train_loss=0.594, train_map=-1.00]Epoch 17: 100%|██████████| 1/1 [00:00<00:00,  3.62it/s, v_num=8138887, val_loss=2.260, val_map=0.000, train_loss=0.594, train_map=-1.00]Epoch 17: 100%|██████████| 1/1 [00:00<00:00,  3.61it/s, v_num=8138887, val_loss=2.260, val_map=0.000, train_loss=0.596, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 26.18it/s][A
+                                                                      [AEpoch 17: 100%|██████████| 1/1 [00:00<00:00,  1.07it/s, v_num=8138887, val_loss=2.280, val_map=0.000, train_loss=0.596, train_map=-1.00]Epoch 17: 100%|██████████| 1/1 [00:00<00:00,  1.06it/s, v_num=8138887, val_loss=2.280, val_map=0.000, train_loss=0.596, train_map=-1.00]Epoch 17:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.280, val_map=0.000, train_loss=0.596, train_map=-1.00]        Epoch 18:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.280, val_map=0.000, train_loss=0.596, train_map=-1.00]Epoch 18: 100%|██████████| 1/1 [00:00<00:00,  3.66it/s, v_num=8138887, val_loss=2.280, val_map=0.000, train_loss=0.596, train_map=-1.00]Epoch 18: 100%|██████████| 1/1 [00:00<00:00,  3.65it/s, v_num=8138887, val_loss=2.280, val_map=0.000, train_loss=0.594, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 25.09it/s][A
+                                                                      [AEpoch 18: 100%|██████████| 1/1 [00:00<00:00,  1.39it/s, v_num=8138887, val_loss=2.330, val_map=0.000, train_loss=0.594, train_map=-1.00]Epoch 18: 100%|██████████| 1/1 [00:00<00:00,  1.38it/s, v_num=8138887, val_loss=2.330, val_map=0.000, train_loss=0.594, train_map=-1.00]Epoch 18:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.330, val_map=0.000, train_loss=0.594, train_map=-1.00]        Epoch 19:   0%|          | 0/1 [00:00<?, ?it/s, v_num=8138887, val_loss=2.330, val_map=0.000, train_loss=0.594, train_map=-1.00]Epoch 19: 100%|██████████| 1/1 [00:00<00:00,  3.62it/s, v_num=8138887, val_loss=2.330, val_map=0.000, train_loss=0.594, train_map=-1.00]Epoch 19: 100%|██████████| 1/1 [00:00<00:00,  3.61it/s, v_num=8138887, val_loss=2.330, val_map=0.000, train_loss=0.588, train_map=-1.00]
+Validation: |          | 0/? [00:00<?, ?it/s][A
+Validation:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0:   0%|          | 0/1 [00:00<?, ?it/s][A
+Validation DataLoader 0: 100%|██████████| 1/1 [00:00<00:00, 25.59it/s][A
+`Trainer.fit` stopped: `max_epochs=20` reached.
+                                                                      [AEpoch 19: 100%|██████████| 1/1 [00:00<00:00,  1.37it/s, v_num=8138887, val_loss=2.370, val_map=0.000, train_loss=0.588, train_map=-1.00]Epoch 19: 100%|██████████| 1/1 [00:00<00:00,  1.36it/s, v_num=8138887, val_loss=2.370, val_map=0.000, train_loss=0.588, train_map=-1.00]Epoch 19: 100%|██████████| 1/1 [00:01<00:00,  0.53it/s, v_num=8138887, val_loss=2.370, val_map=0.000, train_loss=0.588, train_map=-1.00]
+
+###############################################################################
+Hábrók Cluster
+Job 8138887 for user s4362675
+Finished at: Fri Apr 12 13:33:45 CEST 2024
+
+Job details:
+============
+
+Job ID              : 8138887
+Name                : yolo
+User                : s4362675
+Partition           : gpushort
+Nodes               : v100gpu33
+Number of Nodes     : 1
+Cores               : 8
+Number of Tasks     : 1
+State               : RUNNING
+Submit              : 2024-04-12T13:32:17
+Start               : 2024-04-12T13:32:17
+End                 : --
+Reserved walltime   : 00:10:00
+Used walltime       : 00:01:28
+Used CPU time       : --
+% User (Computation): --
+% System (I/O)      : --
+Mem reserved        : 8000M
+Max Mem (Node/step) : 0.00  (Node unknown, N/A)
+Full Max Mem usage  : 0.00  (Until last completed step)
+Total Disk Read     : 0.00  (Until last completed step)
+Total Disk Write    : 0.00  (Until last completed step)
+
+Acknowledgements:
+=================
+
+Please see this page for information about acknowledging Hábrók in your publications:
+
+https://wiki.hpc.rug.nl/habrok/introduction/scientific_output
+
+################################################################################
