@@ -6,7 +6,7 @@ from torchvision.ops import box_iou, box_convert
 from lightning import LightningModule
 from torchmetrics.detection import MeanAveragePrecision
 
-from utils import YOLOv1Loss
+from utils import YOLOv1Loss, transform_from_yolo, transform_to_yolo, postprocess_outputs
 
 from typing import Tuple, List
 
@@ -46,13 +46,12 @@ class FastYOLO1(LightningModule):
         )
 
         self.loss_fn = YOLOv1Loss()
-        self.map = MeanAveragePrecision(box_format='cxcywh')
+        # self.map = MeanAveragePrecision(box_format='cxcywh')
         self.iou_func = torch.vmap(torch.vmap(torch.vmap(box_iou)))
         self.box_convert_func = torch.vmap(torch.vmap(torch.vmap(box_convert)))
 
-        # This is a [7,7,2] grid, where the [i,j]-th cell is equal to [i,j]
-        self.grid = torch.stack(torch.meshgrid(torch.arange(7), torch.arange(7), indexing='ij'), dim=-1).to(self.device)
         self.losses = {'train': [], 'val': []}
+        self.maps = {'train': MeanAveragePrecision(box_format='cxcywh'), 'val': MeanAveragePrecision(box_format='cxcywh')}
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         detections: torch.Tensor = self.net(x)
@@ -82,42 +81,23 @@ class FastYOLO1(LightningModule):
         detections = torch.cat((detections, y_pred[..., self.boxes_dims:]), dim=-1)
         return detections
 
-    def _transform_to_yolo(self, boxes: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+    def _get_map(self, detections: torch.Tensor, target_boxes: List[torch.Tensor], target_labels: List[torch.Tensor], stage: str = 'train'):
 
-        x, y, w, h = boxes.T
-        x, y = x / 64., y / 64.
-        w, h = w / 448., h / 448.
-
-        objectness_score = torch.ones(len(boxes), device=boxes.device)
-
-        feature_map = torch.zeros(7, 7, 6, device=boxes.device)
-        feature_map[x.long(), y.long()] = torch.stack(
-            (x.frac(), y.frac(), w, h, objectness_score, labels), dim=1
-        )
-
-        return feature_map
-
-    def _transform_from_yolo(self, detections: torch.Tensor) -> torch.Tensor:
-        detections[..., [0,1]] = (detections[..., [0,1]] + self.grid.to(detections.device)) * 64
-        detections[..., [0,2]] *= 448
-        return detections.flatten(start_dim=1, end_dim=2)
-
-    def _get_map(self, detections: torch.Tensor, target_boxes: List[torch.Tensor], target_labels: List[torch.Tensor], flag: bool = True):
-
-        pred_boxes = self._transform_from_yolo(detections=detections.detach())
+        detections = transform_from_yolo(detections=detections.detach())
+        detections = postprocess_outputs(detections=detections)
 
         preds = [{
             'boxes': x[..., :4],
             'scores': x[..., 4],
             'labels': x[..., 5:].argmax(-1)
-        } for x in pred_boxes]
+        } for x in detections]
         
         targets = [{
             'boxes': boxes,
             'labels': labels
         } for boxes, labels in zip(target_boxes, target_labels)]
 
-        self.map.update(preds=preds, target=targets)
+        self.maps[stage].update(preds=preds, target=targets)
 
     def training_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
 
@@ -126,7 +106,7 @@ class FastYOLO1(LightningModule):
 
         # Transform targets to yolo coordinates
         y_true = torch.stack(
-            [self._transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
+            [transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
         )
 
         detections = self._process_output(y_pred=y_pred, y_true=y_true)
@@ -144,26 +124,30 @@ class FastYOLO1(LightningModule):
 
         # Transform targets to yolo coordinates
         y_true = torch.stack(
-            [self._transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
+            [transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
         )
 
         detections = self._process_output(y_pred=y_pred, y_true=y_true)
 
         loss = self.loss_fn(detections, y_true)
         self.losses['val'].append(loss)
-        self._get_map(detections=detections, target_boxes=target_boxes, target_labels=target_labels, flag=False)
+        self._get_map(detections=detections, target_boxes=target_boxes, target_labels=target_labels, stage='val')
 
         return loss
 
+    def _log(self, stage: str = 'train') -> None:
+        self.log_dict({
+            f'{stage}_loss': torch.stack(self.losses[stage]).mean(), 
+            f'{stage}_map': self.maps[stage].compute()['map']}, 
+        prog_bar=True)
+        self.losses[stage].clear()
+        self.maps[stage].reset()
+
     def on_train_epoch_end(self) -> None:
-        self.log_dict({'train_loss': torch.stack(self.losses['train']).mean(), 'train_map': self.map.compute()['map']}, prog_bar=True)
-        self.losses['train'].clear()
-        self.map.reset()
+        self._log('train')
 
     def on_validation_epoch_end(self) -> None:
-        self.log_dict({'val_loss': torch.stack(self.losses['val']).mean(), 'val_map': self.map.compute()['map']}, prog_bar=True)
-        self.losses['val'].clear()
-        self.map.reset()
+        self._log('val')
     
     def configure_optimizers(self) -> torch.optim.Optimizer:
         return torch.optim.Adam(params=self.net.parameters(), lr=.001)
