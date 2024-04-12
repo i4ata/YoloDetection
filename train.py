@@ -12,6 +12,6 @@ if __name__ == '__main__':
     print('model initialized')
     data = YOLODataModule(batch_size=10, num_workers=3)
     print('datamodule initialized')
-    trainer = Trainer(overfit_batches=1,accelerator='gpu', max_epochs=15)
+    trainer = Trainer(overfit_batches=1,accelerator='gpu', max_epochs=20, deterministic=True, log_every_n_steps=1)
     print('trainer intitialized')
     trainer.fit(model=model, datamodule=data)

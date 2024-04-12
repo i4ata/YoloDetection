@@ -1,7 +1,7 @@
-from lightning.pytorch.utilities.types import TRAIN_DATALOADERS
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.datasets import VOCDetection
+from torchvision.ops import box_convert
 
 from lightning import LightningDataModule
 
@@ -12,6 +12,22 @@ from typing import Tuple, List
 import os
 
 class YOLODataModule(LightningDataModule):
+    """
+    ***********************************************************************************************************
+    TRAIN AND VAL DATALOADERS:
+
+    Each batch of the dataloader is a tuple of 3 elements:
+
+    1. A torch tensor of stacked images [batch_size, 3, 448, 448]
+    
+    2. A list of length [batch_size]. 
+    Each element is a tensor with the stacked bounding boxes for that image [n_boxes, [cx, cy, w, h]]
+    
+    3. A list of length [batch_size]
+    Each element is a tensor with the stacked class indices for each bounding box in that image [n_boxes, 1]
+    ***********************************************************************************************************
+    """
+
     def __init__(self, batch_size: int = 10, num_workers: int = os.cpu_count()) -> None:
         super().__init__()
         self.batch_size = batch_size
@@ -19,7 +35,7 @@ class YOLODataModule(LightningDataModule):
         self.train_dataset = YOLODataset('data/train')
         self.test_dataset = YOLODataset('data/test')
 
-    def collate_fn(self, batch: List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]) -> Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]]:
+    def _collate_fn(self, batch: List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]) -> Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]]:
         images, boxes, labels = zip(*batch)
         return torch.stack(images), boxes, labels
     
@@ -29,7 +45,7 @@ class YOLODataModule(LightningDataModule):
             batch_size=self.batch_size, 
             shuffle=True, 
             num_workers=self.num_workers, 
-            collate_fn=self.collate_fn
+            collate_fn=self._collate_fn
         )
     
     def val_dataloader(self) -> DataLoader:
@@ -37,7 +53,7 @@ class YOLODataModule(LightningDataModule):
             dataset=self.test_dataset,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            collate_fn=self.collate_fn
+            collate_fn=self._collate_fn
         )
 
 class YOLODataset(Dataset):
@@ -64,10 +80,9 @@ class YOLODataset(Dataset):
             for object in annotations['annotation']['object']
         ])
         transform = self.transform(image=np.asarray(image), bboxes=boxes, labels=labels)
-
         return (
             torch.from_numpy(transform['image']).permute(2,0,1) / 255.,
-            torch.tensor(transform['bboxes']),
+            box_convert(boxes=torch.tensor(transform['bboxes']).float(), in_fmt='xyxy', out_fmt='cxcywh'),
             torch.tensor(list(map(self.classes.index, transform['labels'])))
         )
 
