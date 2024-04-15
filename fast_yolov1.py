@@ -3,12 +3,15 @@
 import torch
 import torch.nn as nn
 from torchvision.ops import box_iou, box_convert
+from torchvision.utils import draw_bounding_boxes
+from torchvision.transforms.functional import pil_to_tensor, to_pil_image, resize
 from lightning import LightningModule
 from torchmetrics.detection import MeanAveragePrecision
+from typing import Tuple, List
+from PIL import Image
 
 from utils import YOLOv1Loss, transform_from_yolo, transform_to_yolo, postprocess_outputs
 
-from typing import Tuple, List
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int) -> None:
@@ -150,7 +153,21 @@ class FastYOLO1(LightningModule):
         self._log('val')
     
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        return torch.optim.Adam(params=self.net.parameters(), lr=.001)
+        return torch.optim.SGD(params=self.net.parameters(), lr=1e-3, momentum=.9, weight_decay=5e-4)
+
+    def predict(self, image: Image) -> Image:
+        image: torch.Tensor = resize(pil_to_tensor(image), size=(448, 448))
+        
+        with torch.inference_mode():
+            self.eval()
+            predictions = self(image.unsqueeze(0) / 255.)
+            predictions = postprocess_outputs(transform_from_yolo(predictions))[0]
+
+        return to_pil_image(draw_bounding_boxes(
+            image=image,
+            boxes=predictions[:, :4],
+            labels=list(map(str, list(predictions[:, 5:])))
+        ))
 
 if __name__ == '__main__':
     yolo = FastYOLO1()

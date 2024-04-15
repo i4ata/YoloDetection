@@ -1,3 +1,4 @@
+from lightning.pytorch.utilities.types import EVAL_DATALOADERS
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.datasets import VOCDetection
@@ -43,7 +44,7 @@ class YOLODataModule(LightningDataModule):
         return DataLoader(
             dataset=self.train_dataset, 
             batch_size=self.batch_size, 
-            # shuffle=True, 
+            shuffle=True, 
             num_workers=self.num_workers, 
             collate_fn=self._collate_fn
         )
