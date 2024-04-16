@@ -68,17 +68,24 @@ class FastYOLO1(LightningModule):
         # Extract the bounding boxes [batch_size, S, S, B, 5]
         boxes = y_pred[..., :self.boxes_dims].view(*y_pred.shape[:-1], self.n_boxes, 5)
 
+        # For each cell, get the ious between the predicted bounding boxes and the true one [batch_size, S, S, 5]
         ious: torch.Tensor = self.iou_func(
             self.box_convert_func(boxes[..., :4], in_fmt='cxcywh', out_fmt='xyxy'),
             self.box_convert_func(y_true[..., :4].unsqueeze(-2), in_fmt='cxcywh', out_fmt='xyxy')
         ).squeeze(-1)
 
+        # For each cell, get the largest iou and the largest index ([batch_size, S, S], [batch_size, S, S])
+        max_ious, best_ious = ious.max(dim=-1)
+
         # Compute the true bounding boxes (the ones with the highest iou) [batch_size, S, S, 5]
         detections = torch.gather(
             input=boxes, 
             dim=3, 
-            index=ious.argmax(-1, keepdim=True).unsqueeze(-1).expand(-1,-1,-1,-1,5)
+            index=best_ious.unsqueeze(-1).unsqueeze(-1).expand(-1,-1,-1,-1,5)
         ).squeeze(-2)
+
+        # In cells with objects, multiply the confidences by the iou
+        detections[..., 4] *= torch.where(y_true[..., 4] == 1, max_ious, 1)
 
         detections = torch.cat((detections, y_pred[..., self.boxes_dims:]), dim=-1)
         return detections

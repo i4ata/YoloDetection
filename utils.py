@@ -42,7 +42,7 @@ class YOLOv1Loss(nn.Module):
             F.mse_loss(input=y_pred[..., 5:][obj_mask], target=F.one_hot(y_true[..., 5][obj_mask].long(), num_classes=y_pred.size(-1) - 5).float())
         )
 
-def postprocess_outputs(detections: torch.Tensor, confidence_threshold: float = .7, iou_threshold: float = .3) -> List[torch.Tensor]:
+def postprocess_outputs(detections: torch.Tensor, confidence_threshold: float = .5, iou_threshold: float = .3) -> List[torch.Tensor]:
     detections = [x[x[:, 4] > confidence_threshold] for x in detections]
     detections = [
         x[nms(

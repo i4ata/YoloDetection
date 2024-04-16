@@ -1,6 +1,9 @@
 # Exclude the dataset
 data/
 
+# Exclude the checkpoints
+lightning_logs/
+
 # Exclude vs code
 .vscode/
 
