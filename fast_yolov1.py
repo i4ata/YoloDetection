@@ -49,7 +49,6 @@ class FastYOLO1(LightningModule):
         )
 
         self.loss_fn = YOLOv1Loss()
-        # self.map = MeanAveragePrecision(box_format='cxcywh')
         self.iou_func = torch.vmap(torch.vmap(torch.vmap(box_iou)))
         self.box_convert_func = torch.vmap(torch.vmap(torch.vmap(box_convert)))
 
