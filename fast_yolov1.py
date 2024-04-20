@@ -136,7 +136,7 @@ class FastYOLO1(LightningModule):
             [transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
         )
 
-        detections = self._process_output(y_pred=y_pred, y_true=y_true)
+        detections, y_true = self._process_output(y_pred=y_pred, y_true=y_true)
 
         loss = self.loss_fn(detections, y_true)
         self.losses['val'].append(loss)
