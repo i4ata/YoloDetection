@@ -9,11 +9,11 @@ if __name__ == '__main__':
     data = YOLODataModule(batch_size=10, num_workers=1)
     early_stopper = EarlyStopping('val_loss')
     trainer = Trainer(
-        overfit_batches=1, 
+        # overfit_batches=1, 
         accelerator='auto', 
         devices='auto', 
         max_epochs=100, 
         deterministic=True, 
-        # callbacks=early_stopper
+        callbacks=early_stopper
     )
     trainer.fit(model=model, datamodule=data)

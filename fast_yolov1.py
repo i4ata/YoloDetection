@@ -63,7 +63,7 @@ class FastYOLO1(LightningModule):
         
         return detections
     
-    def _process_output(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
+    def _process_output(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
 
         # Extract the bounding boxes [batch_size, S, S, B, 5]
         boxes = y_pred[..., :self.boxes_dims].view(*y_pred.shape[:-1], self.n_boxes, 5)
@@ -84,11 +84,11 @@ class FastYOLO1(LightningModule):
             index=best_ious.unsqueeze(-1).unsqueeze(-1).expand(-1,-1,-1,-1,5)
         ).squeeze(-2)
 
-        # In cells with objects, multiply the confidences by the iou
-        detections[..., 4] *= torch.where(y_true[..., 4] == 1, max_ious, 1)
+        # The model predicts the IOU
+        y_true[..., 4] *= max_ious
 
         detections = torch.cat((detections, y_pred[..., self.boxes_dims:]), dim=-1)
-        return detections
+        return detections, y_true
 
     def _get_map(self, detections: torch.Tensor, target_boxes: List[torch.Tensor], target_labels: List[torch.Tensor], stage: str = 'train'):
 
@@ -118,7 +118,7 @@ class FastYOLO1(LightningModule):
             [transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
         )
 
-        detections = self._process_output(y_pred=y_pred, y_true=y_true)
+        detections, y_true = self._process_output(y_pred=y_pred, y_true=y_true)
 
         loss = self.loss_fn(detections, y_true)
         self.losses['train'].append(loss)
