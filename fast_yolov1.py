@@ -2,16 +2,11 @@
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torchvision.ops import box_iou, box_convert
-from torchvision.utils import draw_bounding_boxes
-from torchvision.transforms.functional import pil_to_tensor, to_pil_image, resize
-from lightning import LightningModule
-from torchmetrics.detection import MeanAveragePrecision
 from typing import Tuple, List, Literal
-from PIL import Image
 
-from utils import YOLOv1Loss, transform_from_yolo, transform_to_yolo, postprocess_outputs
-
+from yolo import FastYOLO
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int) -> None:
@@ -24,10 +19,46 @@ class ConvBlock(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.block(x)
     
-class FastYOLO1(LightningModule):
-    def __init__(self, n_boxes: int = 2, n_classes: int = 20) -> None:
-        super(FastYOLO1, self).__init__()
+class YOLOv1Loss(nn.Module):
+    def __init__(self, lambda_coord: float = 5., lambda_noobj: float = .5) -> None:
+        super(YOLOv1Loss, self).__init__()
         
+        self.lambda_coord = lambda_coord
+        self.lambda_noobj = lambda_noobj
+
+    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor, obj_mask: torch.Tensor) -> torch.Tensor:
+        """
+        y_pred shape: [batch_size, 7, 7, [cx,cy,w,h,c] + C]
+        y_true_shape: [batch_size, 7, 7, [cx,cy,w,h,c,i]], where i is the index of the class
+        """
+
+        # Get the noobj mask
+        noobj_mask = ~obj_mask
+
+        return (
+            # x
+            self.lambda_coord * F.mse_loss(input=y_pred[..., 0][obj_mask], target=y_true[..., 0][obj_mask]) + 
+            # y
+            self.lambda_coord * F.mse_loss(input=y_pred[..., 1][obj_mask], target=y_true[..., 1][obj_mask]) + 
+            # w
+            self.lambda_coord * F.mse_loss(input=y_pred[..., 2][obj_mask].sqrt(), target=y_true[..., 2][obj_mask].sqrt()) + 
+            # h
+            self.lambda_coord * F.mse_loss(input=y_pred[..., 3][obj_mask].sqrt(), target=y_true[..., 3][obj_mask].sqrt()) + 
+            # c_obj
+            F.mse_loss(input=y_pred[..., 4][obj_mask], target=y_true[..., 4][obj_mask]) + 
+            # c_noobj
+            self.lambda_noobj * F.mse_loss(input=y_pred[..., 4][noobj_mask], target=y_true[..., 4][noobj_mask]) + 
+            # C
+            F.mse_loss(input=y_pred[..., 5:][obj_mask], target=F.one_hot(y_true[..., 5][obj_mask].long(), num_classes=y_pred.size(-1) - 5).float())
+        )
+
+class FastYOLO1(FastYOLO):
+
+    def __init__(self, n_boxes: int = 2, n_classes: int = 20) -> None:
+        super().__init__()
+        
+        self.image_size = 448
+
         self.n_boxes = n_boxes
         self.n_classes = n_classes
 
@@ -52,9 +83,9 @@ class FastYOLO1(LightningModule):
         self.iou_func = torch.vmap(torch.vmap(torch.vmap(box_iou)))
         self.box_convert_func = torch.vmap(torch.vmap(torch.vmap(box_convert)))
 
-        self.losses = {'train': [], 'val': []}
-        self.maps = {'train': MeanAveragePrecision(box_format='cxcywh'), 'val': MeanAveragePrecision(box_format='cxcywh')}
-    
+        # This is a [7,7,2] grid, where the [i,j]-th cell is equal to [i,j]
+        self.grid = torch.stack(torch.meshgrid(torch.arange(7), torch.arange(7), indexing='ij'), dim=-1)
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         detections: torch.Tensor = self.net(x)
         detections = detections.view(len(x), 7, 7, self.output_dims)
@@ -93,31 +124,13 @@ class FastYOLO1(LightningModule):
         detections = torch.cat((detections, y_pred[..., self.boxes_dims:]), dim=-1)
         return detections, y_true, obj_mask
 
-    def _get_map(self, detections: torch.Tensor, target_boxes: List[torch.Tensor], target_labels: List[torch.Tensor], stage: str = 'train'):
-
-        detections = transform_from_yolo(detections=detections.detach())
-        detections = postprocess_outputs(detections=detections)
-
-        preds = [{
-            'boxes': x[..., :4],
-            'scores': x[..., 4],
-            'labels': x[..., 5:].argmax(-1)
-        } for x in detections]
-        
-        targets = [{
-            'boxes': boxes,
-            'labels': labels
-        } for boxes, labels in zip(target_boxes, target_labels)]
-
-        self.maps[stage].update(preds=preds, target=targets)
-
     def _step(self, batch:  Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], stage: Literal['train', 'val']) -> torch.Tensor:
         inputs, target_boxes, target_labels = batch
         y_pred: torch.Tensor = self(inputs)
 
         # Transform targets to yolo coordinates
         y_true = torch.stack(
-            [transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
+            [self._transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
         )
 
         detections, y_true, obj_mask = self._process_output(y_pred=y_pred, y_true=y_true)
@@ -128,43 +141,30 @@ class FastYOLO1(LightningModule):
         self._get_map(detections=detections, target_boxes=target_boxes, target_labels=target_labels, stage=stage)
         
         return loss
-
-    def training_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
-        return self._step(batch=batch, stage='train')
-
-    def validation_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
-        return self._step(batch=batch, stage='val')
-
-    def _log(self, stage: Literal['train', 'val']) -> None:
-        self.log_dict({
-            f'{stage}_loss': torch.stack(self.losses[stage]).mean(), 
-            f'{stage}_map': self.maps[stage].compute()['map']}, 
-        prog_bar=True)
-        self.losses[stage].clear()
-        self.maps[stage].reset()
-
-    def on_train_epoch_end(self) -> None:
-        self._log(stage='train')
-
-    def on_validation_epoch_end(self) -> None:
-        self._log(stage='val')
     
+    def _transform_from_yolo(self, detections: torch.Tensor) -> torch.Tensor:
+        detections[..., [0,1]] += self.grid.to(detections.device)
+        detections[..., [0,1]] *= 64
+        detections[..., [2,3]] *= 448
+        return detections.flatten(start_dim=1, end_dim=2)
+
+    def _transform_to_yolo(self, boxes: torch.Tensor, labels: torch.Tensor) -> torch.Tensor:
+
+        x, y, w, h = boxes.T
+        x, y = x / 64., y / 64.
+        w, h = w / 448., h / 448.
+
+        objectness_score = torch.ones(len(boxes), device=boxes.device)
+
+        feature_map = torch.zeros(7, 7, 6, device=boxes.device)
+        feature_map[x.long(), y.long()] = torch.stack(
+            (x.frac(), y.frac(), w, h, objectness_score, labels), dim=1
+        )
+
+        return feature_map
+
     def configure_optimizers(self) -> torch.optim.Optimizer:
         return torch.optim.SGD(params=self.net.parameters(), lr=1e-3, momentum=.9, weight_decay=5e-4)
-
-    def predict(self, image: Image) -> Image:
-        image: torch.Tensor = resize(pil_to_tensor(image), size=(448, 448))
-        
-        with torch.inference_mode():
-            self.eval()
-            predictions = self(image.unsqueeze(0) / 255.)
-            predictions = postprocess_outputs(transform_from_yolo(predictions))[0]
-
-        return to_pil_image(draw_bounding_boxes(
-            image=image,
-            boxes=predictions[:, :4],
-            labels=list(map(str, list(predictions[:, 5:])))
-        ))
 
 if __name__ == '__main__':
     yolo = FastYOLO1()
