@@ -1,4 +1,3 @@
-from lightning.pytorch.utilities.types import EVAL_DATALOADERS
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.datasets import VOCDetection
@@ -65,10 +64,12 @@ class YOLODataset(Dataset):
             [A.Resize(448, 448)],
             bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels'])
         )
-        self.classes = ('person', 
-                        'bird', 'cat', 'cow', 'dog', 'horse', 'sheep',
-                        'aeroplane', 'bicycle', 'boat', 'bus', 'car', 'motorbike', 'train',
-                        'bottle', 'chair', 'diningtable', 'pottedplant', 'sofa', 'tvmonitor')
+        self.classes = (
+            'person', 
+            'bird', 'cat', 'cow', 'dog', 'horse', 'sheep',
+            'aeroplane', 'bicycle', 'boat', 'bus', 'car', 'motorbike', 'train',
+            'bottle', 'chair', 'diningtable', 'pottedplant', 'sofa', 'tvmonitor'
+        )
 
     def __len__(self) -> int:
         return len(self.pascal_voc)

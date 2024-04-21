@@ -7,7 +7,7 @@ from torchvision.utils import draw_bounding_boxes
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image, resize
 from lightning import LightningModule
 from torchmetrics.detection import MeanAveragePrecision
-from typing import Tuple, List
+from typing import Tuple, List, Literal
 from PIL import Image
 
 from utils import YOLOv1Loss, transform_from_yolo, transform_to_yolo, postprocess_outputs
@@ -63,10 +63,13 @@ class FastYOLO1(LightningModule):
         
         return detections
     
-    def _process_output(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def _process_output(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
 
         # Extract the bounding boxes [batch_size, S, S, B, 5]
         boxes = y_pred[..., :self.boxes_dims].view(*y_pred.shape[:-1], self.n_boxes, 5)
+
+        # Get the obj_mask
+        obj_mask = y_true[..., 4] != 0
 
         # For each cell, get the ious between the predicted bounding boxes and the true one [batch_size, S, S, 5]
         ious: torch.Tensor = self.iou_func(
@@ -88,7 +91,7 @@ class FastYOLO1(LightningModule):
         y_true[..., 4] *= max_ious
 
         detections = torch.cat((detections, y_pred[..., self.boxes_dims:]), dim=-1)
-        return detections, y_true
+        return detections, y_true, obj_mask
 
     def _get_map(self, detections: torch.Tensor, target_boxes: List[torch.Tensor], target_labels: List[torch.Tensor], stage: str = 'train'):
 
@@ -108,8 +111,7 @@ class FastYOLO1(LightningModule):
 
         self.maps[stage].update(preds=preds, target=targets)
 
-    def training_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
-
+    def _step(self, batch:  Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], stage: Literal['train', 'val']) -> torch.Tensor:
         inputs, target_boxes, target_labels = batch
         y_pred: torch.Tensor = self(inputs)
 
@@ -118,33 +120,22 @@ class FastYOLO1(LightningModule):
             [transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
         )
 
-        detections, y_true = self._process_output(y_pred=y_pred, y_true=y_true)
+        detections, y_true, obj_mask = self._process_output(y_pred=y_pred, y_true=y_true)
 
-        loss = self.loss_fn(detections, y_true)
-        self.losses['train'].append(loss)
+        loss = self.loss_fn(detections, y_true, obj_mask)
+        self.losses[stage].append(loss)
         
-        self._get_map(detections=detections, target_boxes=target_boxes, target_labels=target_labels)
+        self._get_map(detections=detections, target_boxes=target_boxes, target_labels=target_labels, stage=stage)
         
         return loss
+
+    def training_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
+        return self._step(batch=batch, stage='train')
 
     def validation_step(self, batch: Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]], batch_idx: int) -> torch.Tensor:
-        inputs, target_boxes, target_labels = batch
-        y_pred: torch.Tensor = self(inputs)
+        return self._step(batch=batch, stage='val')
 
-        # Transform targets to yolo coordinates
-        y_true = torch.stack(
-            [transform_to_yolo(boxes=boxes, labels=labels) for boxes, labels in zip(target_boxes, target_labels)]
-        )
-
-        detections, y_true = self._process_output(y_pred=y_pred, y_true=y_true)
-
-        loss = self.loss_fn(detections, y_true)
-        self.losses['val'].append(loss)
-        self._get_map(detections=detections, target_boxes=target_boxes, target_labels=target_labels, stage='val')
-
-        return loss
-
-    def _log(self, stage: str = 'train') -> None:
+    def _log(self, stage: Literal['train', 'val']) -> None:
         self.log_dict({
             f'{stage}_loss': torch.stack(self.losses[stage]).mean(), 
             f'{stage}_map': self.maps[stage].compute()['map']}, 
@@ -153,10 +144,10 @@ class FastYOLO1(LightningModule):
         self.maps[stage].reset()
 
     def on_train_epoch_end(self) -> None:
-        self._log('train')
+        self._log(stage='train')
 
     def on_validation_epoch_end(self) -> None:
-        self._log('val')
+        self._log(stage='val')
     
     def configure_optimizers(self) -> torch.optim.Optimizer:
         return torch.optim.SGD(params=self.net.parameters(), lr=1e-3, momentum=.9, weight_decay=5e-4)

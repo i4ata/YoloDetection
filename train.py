@@ -6,7 +6,7 @@ from dataset import YOLODataModule
 
 if __name__ == '__main__':
     model = FastYOLO1()
-    data = YOLODataModule(batch_size=10, num_workers=1)
+    data = YOLODataModule(batch_size=10, num_workers=7)
     early_stopper = EarlyStopping('val_loss')
     trainer = Trainer(
         # overfit_batches=1, 

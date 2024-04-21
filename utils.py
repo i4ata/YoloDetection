@@ -15,14 +15,13 @@ class YOLOv1Loss(nn.Module):
         self.lambda_coord = lambda_coord
         self.lambda_noobj = lambda_noobj
 
-    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
+    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor, obj_mask: torch.Tensor) -> torch.Tensor:
         """
         y_pred shape: [batch_size, 7, 7, [cx,cy,w,h,c] + C]
-        y_true_shape: [batch_size, 7, 7, [cx,cy,w,h,1,i]], where i is the index of the class
+        y_true_shape: [batch_size, 7, 7, [cx,cy,w,h,c,i]], where i is the index of the class
         """
 
-        # Get the 2 masks
-        obj_mask = y_true[..., 4] != 0
+        # Get the noobj mask
         noobj_mask = ~obj_mask
 
         return (
@@ -70,7 +69,8 @@ def transform_to_yolo(boxes: torch.Tensor, labels: torch.Tensor) -> torch.Tensor
     return feature_map
 
 def transform_from_yolo(detections: torch.Tensor) -> torch.Tensor:
-    detections[..., [0,1]] = (detections[..., [0,1]] + GRID.to(detections.device)) * 64
+    detections[..., [0,1]] += GRID.to(detections.device)
+    detections[..., [0,1]] *= 64
     detections[..., [2,3]] *= 448
     return detections.flatten(start_dim=1, end_dim=2)
 
