@@ -78,7 +78,7 @@ class FastYOLO1(FastYOLO):
             nn.Flatten(),
             nn.Linear(in_features=256 * 7 * 7, out_features= 7 * 7 * self.output_dims)
         )
-
+    
         self.loss_fn = YOLOv1Loss()
         self.iou_func = torch.vmap(torch.vmap(torch.vmap(box_iou)))
         self.box_convert_func = torch.vmap(torch.vmap(torch.vmap(box_convert)))
@@ -168,9 +168,9 @@ class FastYOLO1(FastYOLO):
 
 if __name__ == '__main__':
     yolo = FastYOLO1()
-    im = torch.rand(5,3,448,448)
-    out = yolo(im)
+    # im = torch.rand(5,3,448,448)
+    # out = yolo(im)
     print(sum(p.numel() for p in yolo.parameters()))
-    print(out.shape)
-    print(out[..., :10])
+    # print(out.shape)
+    # print(out[..., :10])
     # print(yolo)
