@@ -1,21 +1,13 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.datasets import VOCDetection
-from torchvision.ops import box_convert
-
-from lightning import LightningDataModule
-
 import albumentations as A
 import numpy as np
-
 from typing import Tuple, List
-import os
 
-class YOLODataModule(LightningDataModule):
+class YOLODataset:
     """
     ***********************************************************************************************************
-    TRAIN AND VAL DATALOADERS:
-
     Each batch of the dataloader is a tuple of 3 elements:
 
     1. A torch tensor of stacked images [batch_size, 3, 448, 448]
@@ -28,35 +20,30 @@ class YOLODataModule(LightningDataModule):
     ***********************************************************************************************************
     """
 
-    def __init__(self, batch_size: int = 10, num_workers: int = os.cpu_count()) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self.batch_size = batch_size
-        self.num_workers = num_workers
-        self.train_dataset = YOLODataset('data/train')
-        self.test_dataset = YOLODataset('data/test')
+        self.train_dataset = VOC('data/train')
+        self.val_dataset = VOC('data/test')
 
     def _collate_fn(self, batch: List[Tuple[torch.Tensor, torch.Tensor, torch.Tensor]]) -> Tuple[torch.Tensor, List[torch.Tensor], List[torch.Tensor]]:
         images, boxes, labels = zip(*batch)
         return torch.stack(images), boxes, labels
     
-    def train_dataloader(self) -> DataLoader:
-        return DataLoader(
+    def get_dataloaders(self, batch_size: int = 10) -> Tuple[DataLoader, DataLoader]:
+        train_dataloader = DataLoader(
             dataset=self.train_dataset, 
-            batch_size=self.batch_size, 
+            batch_size=batch_size, 
             shuffle=True, 
-            num_workers=self.num_workers, 
             collate_fn=self._collate_fn
         )
-    
-    def val_dataloader(self) -> DataLoader:
-        return DataLoader(
-            dataset=self.test_dataset,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
+        val_dataloader = DataLoader(
+            dataset=self.val_dataset,
+            batch_size=batch_size,
             collate_fn=self._collate_fn
         )
+        return train_dataloader, val_dataloader
 
-class YOLODataset(Dataset):
+class VOC(Dataset):
     def __init__(self, root: str = 'data/train') -> None:
         super().__init__()
         self.pascal_voc = VOCDetection(root, year='2007', image_set=root.split('/')[1])
@@ -84,13 +71,6 @@ class YOLODataset(Dataset):
         transform = self.transform(image=np.asarray(image), bboxes=boxes, labels=labels)
         return (
             torch.from_numpy(transform['image']).permute(2,0,1) / 255.,
-            box_convert(boxes=torch.tensor(transform['bboxes']).float(), in_fmt='xyxy', out_fmt='cxcywh'),
+            torch.tensor(transform['bboxes']).float(),
             torch.tensor(list(map(self.classes.index, transform['labels'])))
         )
-
-if __name__ == '__main__':
-    test_dataset = YOLODataModule(num_workers=3)
-    d_loader = test_dataset.train_dataloader()
-    x,y = next(iter(d_loader))
-    print(x.shape, y.shape)
-    #print(y[0])
