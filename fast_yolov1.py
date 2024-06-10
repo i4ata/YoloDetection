@@ -2,6 +2,7 @@
 
 import torch
 import torch.nn as nn
+from torchvision.models import efficientnet_b0
 
 class ConvBlock(nn.Module):
     def __init__(self, in_channels: int, out_channels: int) -> None:
@@ -16,7 +17,7 @@ class ConvBlock(nn.Module):
     
 class FastYOLO1(nn.Module):
 
-    def __init__(self, n_boxes: int = 2, n_classes: int = 20) -> None:
+    def __init__(self, pretrained: bool = True, feature_map_dim: int = 7, n_boxes: int = 2, n_classes: int = 20) -> None:
         super().__init__()
 
         self.n_boxes = n_boxes
@@ -25,22 +26,31 @@ class FastYOLO1(nn.Module):
         self.boxes_dims = n_boxes * 5
         self.output_dims = self.boxes_dims + n_classes
 
-        pool = nn.MaxPool2d(2)
-        self.net = nn.Sequential(
-            ConvBlock(3, 16), pool, 
-            ConvBlock(16, 32), pool,
-            ConvBlock(32, 64), pool,
-            ConvBlock(64, 128), pool,
-            ConvBlock(128, 256), pool,
-            ConvBlock(256, 512), pool,
-            ConvBlock(512, 1024),
-            ConvBlock(1024, 256),
+        if pretrained:
+            self.backbone = nn.Sequential(
+                efficientnet_b0(weights='DEFAULT').features,
+                nn.Conv2d(in_channels=1280, out_channels=64, kernel_size=1),
+            )
+        else:
+            pool = nn.MaxPool2d(2)
+            self.backbone = nn.Sequential(
+                ConvBlock(3, 16), pool, 
+                ConvBlock(16, 32), pool,
+                ConvBlock(32, 64), pool,
+                ConvBlock(64, 128), pool,
+                ConvBlock(128, 256), pool,
+                ConvBlock(256, 512), pool,
+                ConvBlock(512, 1024),
+                ConvBlock(1024, 256)
+            )
+
+        self.output_layer = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=256 * 7 * 7, out_features= 7 * 7 * self.output_dims)
+            nn.Linear(in_features=12_544, out_features= feature_map_dim * feature_map_dim * self.output_dims),
         )
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        detections: torch.Tensor = self.net(x)
+        detections: torch.Tensor = self.output_layer(self.backbone(x))
         detections = detections.view(len(x), 7, 7, self.output_dims)
         detections[..., :self.boxes_dims] = detections[..., :self.boxes_dims].sigmoid() + torch.finfo().eps
         detections[..., self.boxes_dims:] = detections[..., self.boxes_dims:].softmax(-1)

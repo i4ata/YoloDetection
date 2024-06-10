@@ -74,3 +74,12 @@ class VOC(Dataset):
             torch.tensor(transform['bboxes']).float(),
             torch.tensor(list(map(self.classes.index, transform['labels'])))
         )
+
+if __name__ == '__main__':
+    
+    d = YOLODataset()
+    dl,_=d.get_dataloaders()
+    images, boxes, labels = next(iter(dl))
+    print(images.shape)
+    print([b.shape for b in boxes])
+    print([l.shape for l in labels])    
